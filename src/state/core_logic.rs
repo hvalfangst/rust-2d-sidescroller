@@ -3,26 +3,42 @@ use std::collections::HashMap;
 use std::io::{BufReader, Cursor};
 use std::rc::Rc;
 use std::thread::sleep;
-use crate::state::{apply_friction, jump_obstacles, Direction, GameState, DOWN_SOUND, GRAVITY, GROUND, LOWER_BOUND, UPPER_BOUND};
+use crate::state::{jump_obstacles, Direction, GameState, DOWN_SOUND, GRAVITY, GROUND, LOWER_BOUND, UPPER_BOUND};
 use rodio::{Sink, Source};
 use crate::graphics::renderer::render_pixel_buffer;
+use crate::state::input_logic::check_collision;
 use crate::state::player::Player;
 use crate::state::update::update_pixel_buffer;
 
 
-pub fn execute_core_logic(game_state: &mut GameState, global_commands: &HashMap<String, Rc<RefCell<dyn CoreLogic>>>, sink: &mut Sink, any_key_pressed: bool) {
-    for (_, global_command) in global_commands.iter() {
-        global_command.borrow().execute(game_state, sink);
+pub fn execute_core_logic(game_state: &mut GameState, core_logic_operations: &HashMap<String, Rc<RefCell<dyn CoreLogic>>>, sink: &mut Sink, any_key_pressed: bool) {
+    for (_, core_logic_operation) in core_logic_operations.iter() {
+        core_logic_operation.borrow().execute(game_state, sink);
     }
 
-    if !any_key_pressed {
-        apply_friction(game_state);
-        sink.stop();
-    }
+    // if !any_key_pressed {
+    //     apply_friction(game_state);
+        // sink.stop();
+    // }
 }
 
 pub trait CoreLogic {
     fn execute(&self, game_state: &mut GameState, sink: &mut Sink);
+}
+
+pub struct CollisionDetection;
+
+impl CoreLogic for CollisionDetection {
+    fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
+        let obstacles = &game_state.all_maps[game_state.current_map_index].obstacles;
+        let direction = game_state.player.direction;
+        let (obstacle, _id) = check_collision(obstacles, &game_state.sprites, &game_state.player, direction == Direction::Left);
+
+        if obstacle {
+            game_state.player.vx = 0.0;
+        }
+
+    }
 }
 
 pub struct ApplyGravity;
@@ -58,7 +74,7 @@ impl CoreLogic for ApplyGravity {
 
             let source = rodio::Decoder::new(BufReader::new(cursor))
                 .unwrap()
-                .take_duration(std::time::Duration::from_millis(1000));
+                .take_duration(std::time::Duration::from_millis(3000));
 
             sink.append(source); // Play the sound
 
@@ -125,9 +141,9 @@ impl CoreLogic for CheckGameOver {
     }
 }
 
-pub struct ApplyFriction;
+pub struct ModifyPosition;
 
-impl CoreLogic for ApplyFriction {
+impl CoreLogic for ModifyPosition {
     fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
         if game_state.player.direction == Direction::Left {
             game_state.player.x -= game_state.player.vx;
@@ -141,11 +157,12 @@ impl CoreLogic for ApplyFriction {
 pub fn initialize_core_logic_map() -> HashMap<String, Rc<RefCell<dyn CoreLogic>>> {
     let mut logic_map: HashMap<String, Rc<RefCell<dyn CoreLogic>>> = HashMap::new();
     logic_map.insert("JumpingObstacles".to_string(), Rc::new(RefCell::new(JumpingObstacles)));
+    logic_map.insert("CollisionDetection".to_string(), Rc::new(RefCell::new(CollisionDetection)));
     logic_map.insert("ApplyGravity".to_string(), Rc::new(RefCell::new(ApplyGravity)));
     logic_map.insert("VerticalBounds".to_string(), Rc::new(RefCell::new(VerticalBounds)));
     logic_map.insert("HorizontalBounds".to_string(), Rc::new(RefCell::new(HorizontalBounds)));
     logic_map.insert("CheckGameOver".to_string(), Rc::new(RefCell::new(CheckGameOver)));
-    logic_map.insert("ApplyFriction".to_string(), Rc::new(RefCell::new(ApplyFriction)));
+    logic_map.insert("ModifyPosition".to_string(), Rc::new(RefCell::new(ModifyPosition)));
 
     logic_map
 }

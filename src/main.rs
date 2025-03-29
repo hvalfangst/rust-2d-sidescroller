@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io;
 use std::io::{BufRead, Read};
 use std::path::Path;
-
+use std::process::exit;
 use minifb::{Window, WindowOptions};
 use winit::event_loop::EventLoop;
 use winit::monitor::MonitorHandle;
@@ -10,7 +10,7 @@ use winit::monitor::MonitorHandle;
 use crate::state::player::Player;
 use crate::state::{GameState, Map, Obstacle, ObstacleId, Viewport};
 use crate::{
-    graphics::sprites::Sprites,
+    graphics::sprites::SpriteMaps,
     state::event_loop::start_event_loop,
     state::input_logic::initialize_input_logic_map,
     state::core_logic::initialize_core_logic_map,
@@ -27,18 +27,41 @@ fn main() {
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
     let mut sink = Sink::try_new(&stream_handle).unwrap();
 
-    let sprites = Sprites::new();
+    let sprites = SpriteMaps::new();
     let mut player = Player::new(1.0, 176.0);
     let input_logic = initialize_input_logic_map();
     let core_logic = initialize_core_logic_map();
 
-    let (mut map_one_tiles, map_one_width, map_one_height) = read_grid_from_file("map_one.txt").expect("Failed to read grid from file");
-    let (mut map_two_tiles, _map_two_width, _map_two_height) = read_grid_from_file("map_two.txt").expect("Failed to read grid from file");
-    let (mut map_three_tiles, map_two_width, map_two_height) = read_grid_from_file("map_three.txt").expect("Failed to read grid from file");
+    let (mut map_one_tiles, map_one_width, map_one_height) = read_grid_from_file("assets/maps/map_one.txt").expect("Failed to read grid from file");
+    let (mut map_two_tiles, _map_two_width, _map_two_height) = read_grid_from_file("assets/maps/map_two.txt").expect("Failed to read grid from file");
+    let (mut map_three_tiles, map_two_width, map_two_height) = read_grid_from_file("assets/maps/map_three.txt").expect("Failed to read grid from file");
     let mut map_one_obstacles = extract_obstacles(&map_one_tiles, false);
     let mut map_two_obstacles = extract_obstacles(&map_two_tiles, false);
     let mut map_three_obstacles = extract_obstacles(&map_three_tiles, false);
 
+    // output obstacle one info for debugging
+    for obstacle in &map_one_obstacles {
+        println!(
+            "Obstacle one info: ID: {:?}, X.LEFT: {}, X.RIGHT: {}, Y.BOTTOM: {}, Y.TOP: {}, ACTIVE: {}, DURABILITY: {}, FALLING: {}, VELOCITY_Y: {}, LEFT_OBSTACLE: {:?}, RIGHT_OBSTACLE: {:?}, OVER_OBSTACLE: {:?}, UNDER_OBSTACLE: {:?}, IS_BOTTOM_OBSTACLE: {}, IS_TOP_OBSTACLE: {}, IS_LEFTMOST_OBSTACLE: {}, IS_RIGHTMOST_OBSTACLE: {}",
+            obstacle.id,
+            obstacle.x_left,
+            obstacle.x_right,
+            obstacle.y_bottom,
+            obstacle.y_top,
+            obstacle.active,
+            obstacle.durability,
+            obstacle.falling,
+            obstacle.velocity_y,
+            obstacle.left_obstacle,
+            obstacle.right_obstacle,
+            obstacle.over_obstacle,
+            obstacle.under_obstacle,
+            obstacle.is_bottom_obstacle,
+            obstacle.is_top_obstacle,
+            obstacle.is_leftmost_obstacle,
+            obstacle.is_rightmost_obstacle
+        );
+    }
 
     let fullscreen = false;
 
@@ -208,17 +231,56 @@ fn extract_obstacles(grid: &Vec<Tile>, sort_by_y: bool) -> Vec<Obstacle> {
                 active: true,
                 durability: 2,
                 falling: false,
-                velocity_y: 0.0
+                velocity_y: 0.0,
+                left_obstacle: None,
+                right_obstacle: None,
+                over_obstacle: None,
+                under_obstacle: None,
+                is_bottom_obstacle: false,
+                is_top_obstacle: false,
+                is_leftmost_obstacle: false,
+                is_rightmost_obstacle: false,
             });
         }
     }
 
-    // if sort_by_y {
-    //     sort_obstacles_by_y(&mut obstacles);
-    // }
+    // Determine obstacle relationships and positions
+    for i in 0..obstacles.len() {
+        let mut is_bottom = true;
+        let mut is_top = true;
+        let mut is_leftmost = true;
+        let mut is_rightmost = true;
+
+        for j in 0..obstacles.len() {
+            if i != j {
+                if obstacles[j].y_bottom > obstacles[i].y_bottom {
+                    obstacles[i].under_obstacle = Some(obstacles[j].id);
+                    is_bottom = false;
+                }
+                if obstacles[j].y_top < obstacles[i].y_top {
+                    obstacles[i].over_obstacle = Some(obstacles[j].id);
+                    is_top = false;
+                }
+                if obstacles[j].x_right < obstacles[i].x_left {
+                    obstacles[i].left_obstacle = Some(obstacles[j].id);
+                    is_leftmost = false;
+                }
+                if obstacles[j].x_left > obstacles[i].x_right {
+                    obstacles[i].right_obstacle = Some(obstacles[j].id);
+                    is_rightmost = false;
+                }
+            }
+        }
+
+        obstacles[i].is_bottom_obstacle = is_bottom;
+        obstacles[i].is_top_obstacle = is_top;
+        obstacles[i].is_leftmost_obstacle = is_leftmost;
+        obstacles[i].is_rightmost_obstacle = is_rightmost;
+    }
+
 
     obstacles
-}
+   }
 
 pub fn sort_obstacles_by_y(mut obstacles: Vec<Obstacle>) -> Vec<Obstacle> {
         // Sort by Y position

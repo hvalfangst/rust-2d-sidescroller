@@ -1,7 +1,7 @@
 use std::io::{BufReader, Cursor};
 use std::time::Duration;
 
-use crate::graphics::sprites::Sprites;
+use crate::graphics::sprites::SpriteMaps;
 use crate::state::player::{Player, PlayerState};
 use crate::Tile;
 use minifb::Window;
@@ -59,6 +59,14 @@ pub struct Obstacle {
     pub falling: bool,   // Whether it's falling
     pub active: bool,    // If false, box is removed
     pub durability: u8,  // Health of the box
+    pub is_bottom_obstacle: bool,
+    pub is_top_obstacle: bool,
+    pub is_leftmost_obstacle: bool,
+    pub is_rightmost_obstacle: bool,
+    pub left_obstacle: Option<ObstacleId>,
+    pub right_obstacle: Option<ObstacleId>,
+    pub over_obstacle: Option<ObstacleId>,
+    pub under_obstacle: Option<ObstacleId>
 }
 pub fn jump_obstacles(mut game_state: &mut GameState, sink: &mut rodio::Sink) {
 
@@ -84,7 +92,7 @@ pub fn jump_obstacles(mut game_state: &mut GameState, sink: &mut rodio::Sink) {
         }
 
         if game_state.player.x + 10.0 > obstacle.x_left && game_state.player.x + 5.0 < obstacle.x_right {
-            if game_state.player.y <= obstacle.y_bottom && game_state.player.y >= obstacle.y_top {
+            if game_state.player.y <= obstacle.y_bottom && game_state.player.y >= obstacle.y_top && obstacle.is_top_obstacle {
                  // println!("game_state.player.y: {}, obstacle.y_bottom: {}, obstacle.y_top: {}", game_state.player.y, obstacle.y_bottom, obstacle.y_top);
                 if game_state.player.state != PlayerState::OnObstacle {
                     // player just landed on the obstacle
@@ -129,7 +137,7 @@ pub fn jump_obstacles(mut game_state: &mut GameState, sink: &mut rodio::Sink) {
 
                 let source = rodio::Decoder::new(BufReader::new(cursor))
                     .unwrap()
-                    .take_duration(std::time::Duration::from_millis(1000));
+                    .take_duration(std::time::Duration::from_millis(2500));
 
                 sink.append(source); // Play the sound
             }
@@ -148,20 +156,6 @@ pub fn jump_obstacles(mut game_state: &mut GameState, sink: &mut rodio::Sink) {
     }
 }
 
-
-fn apply_friction(mut game_state: &mut GameState) {
-    if game_state.player.vx > 0.0 {
-        game_state.player.vx -= FRICTION;
-        if game_state.player.vx < 0.0 {
-            game_state.player.vx = 0.0;
-        }
-    } else if game_state.player.vx < 0.0 {
-        game_state.player.vx += FRICTION;
-        if game_state.player.vx > 0.0 {
-            game_state.player.vx = 0.0;
-        }
-    }
-}
 
 pub struct Viewport {
     pub x: f32,
@@ -249,7 +243,7 @@ pub struct Map<'a> {
 
 pub struct GameState<'a> {
     pub player: Player,
-    pub sprites: Sprites,
+    pub sprites: SpriteMaps,
     pub window_buffer: &'a mut Vec<u32>,
     pub grass_sprite_index: usize,
     pub sky_sprite_index: usize,

@@ -2,7 +2,7 @@
 
 2D game programmed in Rust
 
-![screenshot](assets/screenshot.png)
+![screenshot](assets/sprites/screenshot.png)
 
 ## Requirements
 * [Rust](https://www.rust-lang.org/tools/install)

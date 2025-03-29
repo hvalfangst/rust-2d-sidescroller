@@ -4,7 +4,7 @@ use std::sync::Arc;
 use crate::state::{remove_box, GameState, Obstacle, ACCELERATION, JUMP_SOUND, JUMP_VELOCITY, KICK_BOX_SOUND, KICK_SOUND, MAX_VELOCITY, WALK_SOUND_1, WALK_SOUND_2, WALK_SOUND_3, WALK_SOUND_4};
 use minifb::{Key, KeyRepeat};
 use rodio::{Sink, Source};
-use crate::graphics::sprites::Sprites;
+use crate::graphics::sprites::SpriteMaps;
 use crate::state::Direction::{Left, Right};
 use crate::state::player::Player;
 
@@ -37,44 +37,37 @@ pub trait InputLogic {
 pub struct MoveLeft;
 impl InputLogic for MoveLeft {
     fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
-        let (obstacle_left, _id) = check_collision(game_state.all_maps[game_state.current_map_index].obstacles, &game_state.sprites, &game_state.player, true);
 
-        if !obstacle_left {
-            game_state.player.obstacle_left = false;
-
-            // Update velocity if no collision is detected
-            game_state.player.vx += ACCELERATION * 0.5;
-            if game_state.player.vx > MAX_VELOCITY {
-                game_state.player.vx = MAX_VELOCITY;
-            } else {
-                game_state.player.vx *= 0.98;
-            }
-
-            game_state.player.last_key = Some(Key::A);
-            game_state.player.direction = Left;
-
-            // Initialize a new field to track the frame count
-            game_state.player.left_increment_frame_count += 1;
-
-            if game_state.player.left_increment_frame_count >= 3 {
-                game_state.player.left_increment_frame_count = 0; // Reset the frame count
-
-                match game_state.player.left_increment {
-                    7 => {
-                        game_state.player.left_increment = 4;
-                    }
-                    _ => {
-                        game_state.player.left_increment += 1;
-                    }
-                };
-            }
+        // Update velocity if no collision is detected
+        game_state.player.vx += ACCELERATION * 0.5;
+        if game_state.player.vx > MAX_VELOCITY {
+            game_state.player.vx = MAX_VELOCITY;
         } else {
-            // Stop the player from moving left if colliding
-            game_state.player.vx = 0.0;
+            game_state.player.vx *= 0.98;
         }
 
-        // Move player based on current velocity
-        // game_state.player.x -= game_state.player.vx;
+        game_state.player.last_key = Some(Key::A);
+        game_state.player.direction = Left;
+
+        // Initialize a new field to track the frame count
+        game_state.player.left_increment_frame_count += 1;
+
+        if game_state.player.left_increment_frame_count >= 3 {
+            game_state.player.left_increment_frame_count = 0; // Reset the frame count
+
+            match game_state.player.left_increment {
+                7 => {
+                    game_state.player.left_increment = 4;
+                }
+                _ => {
+                    game_state.player.left_increment += 1;
+                }
+            };
+        }
+
+    if game_state.footstep_active {
+        play_footstep_sound(game_state, sink);
+    }
     }
 }
 
@@ -82,63 +75,42 @@ pub struct MoveRight;
 
 impl InputLogic for MoveRight {
     fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
-        let (obstacle_right, _id) = check_collision(game_state.all_maps[game_state.current_map_index].obstacles, &game_state.sprites, &game_state.player, false);
 
-        if !obstacle_right {
-            game_state.player.obstacle_right = false;
+        // Update velocity
+        game_state.player.vx += ACCELERATION * 0.5;
+        if game_state.player.vx > MAX_VELOCITY {
+            game_state.player.vx = MAX_VELOCITY;
+        } else {
+            game_state.player.vx *= 0.98;
+        }
 
-            // Update velocity if no collision is detected
-            game_state.player.vx += ACCELERATION * 0.5;
-            if game_state.player.vx > MAX_VELOCITY {
-                game_state.player.vx = MAX_VELOCITY;
-            } else {
-                game_state.player.vx *= 0.98;
-            }
+        game_state.player.last_key = Some(Key::D);
+        game_state.player.direction = Right;
 
-            game_state.player.last_key = Some(Key::D);
-            game_state.player.direction = Right;
+        // Initialize a new field to track the frame count
+        game_state.player.right_increment_frame_count += 1;
 
-            // Initialize a new field to track the frame count
-            game_state.player.right_increment_frame_count += 1;
+        if game_state.player.right_increment_frame_count >= 3 {
+            game_state.player.right_increment_frame_count = 0; // Reset the frame count
 
-            if game_state.player.right_increment_frame_count >= 3 {
-                game_state.player.right_increment_frame_count = 0; // Reset the frame count
-
-                match game_state.player.right_increment {
-                    3 => {
-                        game_state.player.right_increment = 0;
-                    }
-                    _ => {
-                        game_state.player.right_increment += 1;
-                    }
+            match game_state.player.right_increment {
+                3 => {
+                    game_state.player.right_increment = 0;
+                }
+                _ => {
+                    game_state.player.right_increment += 1;
                 }
             }
-        } else {
-            // Stop the player from moving right if colliding
-            game_state.player.vx = 0.0;
         }
 
         if game_state.footstep_active {
-            if game_state.footstep_index == 4 { game_state.footstep_index = 0; }
-            else { game_state.footstep_index += 1; }
-
-            let sound_index = match game_state.footstep_index {
-                0 => WALK_SOUND_1,
-                1 => WALK_SOUND_2,
-                2 => WALK_SOUND_3,
-                _ => WALK_SOUND_4,
-            };
-
-            // let file = &game_state.sounds[sound_index];;
-            // let source = rodio::Decoder::new(BufReader::new(file)).unwrap().take_duration(std::time::Duration::from_millis(125));
-            // let _result = sink.append(source);
+            play_footstep_sound(game_state, sink);
         }
-
 
     }
 }
 
-pub fn check_collision(obstacles: &Vec<Obstacle>, sprites: &Sprites, player: &Player, is_left: bool) -> (bool, Option<usize>) {
+pub fn check_collision(obstacles: &Vec<Obstacle>, sprites: &SpriteMaps, player: &Player, is_left: bool) -> (bool, Option<usize>) {
     let mut collision_id: Option<usize> = None;
     println!("----------------------------------------------------------------------");
     let collision = obstacles.iter().enumerate().any(|(index, obstacle)| {
@@ -196,7 +168,7 @@ impl InputLogic for Jump {
 
             let source = rodio::Decoder::new(BufReader::new(cursor))
                 .unwrap()
-                .take_duration(std::time::Duration::from_millis(1000));
+                .take_duration(std::time::Duration::from_millis(1500));
 
             sink.append(source); // Play the sound
 
@@ -249,6 +221,26 @@ impl InputLogic for Kick {
             sink.append(source); // Play the sound
         }
     }
+}
+
+fn play_footstep_sound(game_state: &mut GameState, sink: &mut Sink) {
+    if game_state.footstep_index == 4 { game_state.footstep_index = 0; } else { game_state.footstep_index += 1; }
+
+    let sound_index = match game_state.footstep_index {
+        0 => WALK_SOUND_1,
+        1 => WALK_SOUND_2,
+        2 => WALK_SOUND_3,
+        _ => WALK_SOUND_4,
+    };
+
+    let file = &game_state.sounds[sound_index]; // Get the raw sound data (Vec<u8>)
+    let cursor = Cursor::new(file.clone()); // Clone to create an owned Cursor<Vec<u8>>
+
+    let source = rodio::Decoder::new(BufReader::new(cursor))
+        .unwrap()
+        .take_duration(std::time::Duration::from_millis(200));
+
+    sink.append(source); // Play the sound
 }
 
 pub type InputLogicMap = HashMap<Key, Arc<dyn InputLogic>>;

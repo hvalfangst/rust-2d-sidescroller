@@ -1,41 +1,41 @@
 use image::GenericImageView;
 
-pub struct Sprite {
+pub struct SpriteFrame {
     pub width: u32,  // Width of the sprite in pixels
     pub height: u32, // Height of the sprite in pixels
     data: Vec<u32> // Pixel data of the sprite, typically in ARGB or RGBA format
 }
 
-impl Sprite {
+impl SpriteFrame {
     fn new(width: u32, height: u32, data: Vec<u32>) -> Self {
         Self { width, height, data }
     }
 }
 
-pub struct Sprites {
-    pub player: Vec<Sprite>,
-    pub kick: Vec<Sprite>,
-    pub jump: Vec<Sprite>,
-    pub shadow: Vec<Sprite>,
-    pub game_over: Vec<Sprite>,
-    pub grass: Vec<Sprite>,
-    pub sky: Vec<Sprite>,
-    pub blue_background: Vec<Sprite>,
-    pub metal_box: Vec<Sprite>
+pub struct SpriteMaps {
+    pub player: Vec<SpriteFrame>,
+    pub kick: Vec<SpriteFrame>,
+    pub jump: Vec<SpriteFrame>,
+    pub shadow: Vec<SpriteFrame>,
+    pub game_over: Vec<SpriteFrame>,
+    pub grass: Vec<SpriteFrame>,
+    pub sky: Vec<SpriteFrame>,
+    pub blue_background: Vec<SpriteFrame>,
+    pub metal_box: Vec<SpriteFrame>
 }
 
-impl Sprites {
+impl SpriteMaps {
     pub fn new() -> Self {
         Self {
-            player: load_sprites_from_map("assets/player.png", 23, 33),
-            shadow: load_sprites_from_map("assets/shadow.png", 24, 10),
-            game_over: load_sprites_from_map("assets/game_over.png", 256, 224),
-            kick: load_sprites_from_map("assets/kick.png", 27, 33),
-            jump: load_sprites_from_map("assets/jump.png", 24, 34),
-            grass: load_sprites_from_map("assets/grass.png", 256, 17),
-            sky: load_sprites_from_map("assets/sky.png", 256, 134),
-            blue_background: load_sprites_from_map("assets/blue_background.png", 256, 224),
-            metal_box: load_sprites_from_map("assets/box.png", 16, 16),
+            player: load_sprites_from_map("assets/sprites/player.png", 23, 33),
+            shadow: load_sprites_from_map("assets/sprites/shadow.png", 24, 10),
+            game_over: load_sprites_from_map("assets/sprites/game_over.png", 256, 224),
+            kick: load_sprites_from_map("assets/sprites/kick.png", 27, 33),
+            jump: load_sprites_from_map("assets/sprites/jump.png", 24, 34),
+            grass: load_sprites_from_map("assets/sprites/grass.png", 256, 17),
+            sky: load_sprites_from_map("assets/sprites/sky.png", 256, 134),
+            blue_background: load_sprites_from_map("assets/sprites/blue_background.png", 256, 224),
+            metal_box: load_sprites_from_map("assets/sprites/box.png", 16, 16),
         }
     }
 }
@@ -52,7 +52,7 @@ impl Sprites {
 ///
 /// # Returns
 /// A vector containing tuples of sprite dimensions and pixel data.
-pub fn load_sprites_from_map(sprite_map_path: &str, sprite_width: u32, sprite_height: u32) -> Vec<Sprite> {
+pub fn load_sprites_from_map(sprite_map_path: &str, sprite_width: u32, sprite_height: u32) -> Vec<SpriteFrame> {
     // Load the sprite map image
     let sprite_map = image::open(sprite_map_path).expect(&format!("Failed to open sprite map at {}", sprite_map_path));
     let (map_width, map_height) = sprite_map.dimensions();
@@ -75,7 +75,7 @@ pub fn load_sprites_from_map(sprite_map_path: &str, sprite_width: u32, sprite_he
             let sprite = sprite_map.crop_imm(x * sprite_width, y * sprite_height, sprite_width, sprite_height);
             let buffer = img_to_buffer(&sprite);
             println!("Sprite extracted: {}x{}, buffer length: {}", sprite_width, sprite_height, buffer.len());
-            let new_sprite = Sprite::new(sprite_width, sprite_height, buffer);
+            let new_sprite = SpriteFrame::new(sprite_width, sprite_height, buffer);
             sprites.push(new_sprite);
         }
     }
@@ -146,7 +146,7 @@ pub fn img_to_buffer(img: &image::DynamicImage) -> Vec<u32> {
 /// let mut window_buffer = vec![0xFFFFFFFF; 800 * 600]; // A white 800x600 window buffer
 /// draw_sprite(10, 10, &sprite, &mut window_buffer, 800);
 /// ```
-pub fn draw_sprite(x: usize, y: usize, sprite: &Sprite, window_buffer: &mut [u32], window_width: usize) {
+pub fn draw_sprite(x: usize, y: usize, sprite: &SpriteFrame, window_buffer: &mut [u32], window_width: usize) {
 
     for row in 0..sprite.height as usize {
         for col in 0..sprite.width as usize {
