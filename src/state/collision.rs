@@ -1,9 +1,7 @@
-use rodio::Sink;
-use crate::graphics::sprites::SpriteMaps;
 use crate::state::core_logic::CoreLogic;
-use crate::state::{Direction, GameState, Obstacle};
 use crate::state::physics::check_collision;
-use crate::state::player::Player;
+use crate::state::{Direction, GameState};
+use rodio::Sink;
 
 pub struct CollisionDetection;
 

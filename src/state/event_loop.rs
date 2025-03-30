@@ -30,7 +30,7 @@ pub fn start_event_loop(mut game_state: GameState, input_logic_map: InputLogicMa
         }
 
         // Handle basic user input, which influence the player's state such as velocity, direction, etc.
-        let any_key_pressed = handle_user_input(&mut game_state, &input_logic_map, sink);
+        handle_user_input(&mut game_state, &input_logic_map, sink);
 
         // Process game logic such as obstacle detection, physics, sounds etc.
         execute_core_logic(&mut game_state, &core_logic_map, sink);
@@ -41,11 +41,11 @@ pub fn start_event_loop(mut game_state: GameState, input_logic_map: InputLogicMa
             last_grass_sprite_index_change = Instant::now(); // Reset the timer to current time
         }
 
-        // Change sky sprite every 2 seconds - alternate between 0 and 3
-        if last_sky_sprite_index_change.elapsed() >= BACKGROUND_CHANGE_INTERVAL * 2 {
-            game_state.sky_sprite_index = (game_state.sky_sprite_index + 1) % 4; // Cycle between 0 and 3
-            last_sky_sprite_index_change = Instant::now(); // Reset the timer to current time
-        }
+        // // Change sky sprite every 2 seconds - alternate between 0 and 3
+        // if last_sky_sprite_index_change.elapsed() >= BACKGROUND_CHANGE_INTERVAL * 2 {
+        //     game_state.sky_sprite_index = (game_state.sky_sprite_index + 1) % 4; // Cycle between 0 and 3
+        //     last_sky_sprite_index_change = Instant::now(); // Reset the timer to current time
+        // }
 
         // Update the pixel buffer with the current game state
         update_pixel_buffer(&mut game_state);

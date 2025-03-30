@@ -33,7 +33,7 @@ impl SpriteMaps {
             kick: load_sprites_from_map("assets/sprites/kick.png", 27, 33),
             jump: load_sprites_from_map("assets/sprites/jump.png", 24, 34),
             grass: load_sprites_from_map("assets/sprites/grass.png", 256, 17),
-            sky: load_sprites_from_map("assets/sprites/sky.png", 256, 134),
+            sky: load_sprites_from_map("assets/sprites/sky_2.png", 256, 207),
             blue_background: load_sprites_from_map("assets/sprites/blue_background.png", 256, 224),
             metal_box: load_sprites_from_map("assets/sprites/box.png", 16, 16),
         }

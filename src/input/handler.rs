@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use crate::state::physics::decrease_velocity;
 
-pub fn handle_user_input(game_state: &mut GameState, commands: &InputLogicMap, sink: &mut Sink) -> bool {
+pub fn handle_user_input(game_state: &mut GameState, commands: &InputLogicMap, sink: &mut Sink) {
     let legal_keys = [Key::Space, Key::D, Key::A, Key::X];
     let mut any_key_pressed = false;
     let mut movement_key_pressed = false;
@@ -28,8 +28,6 @@ pub fn handle_user_input(game_state: &mut GameState, commands: &InputLogicMap, s
     if !any_key_pressed {
         decrease_velocity(game_state);
     }
-
-    any_key_pressed
 }
 
 fn delegate_command(key: Key, commands: &InputLogicMap, game_state: &mut GameState, sink: &mut Sink) {

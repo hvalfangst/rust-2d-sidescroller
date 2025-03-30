@@ -14,12 +14,26 @@ impl InputLogic for MoveRight {
         // Update velocity
         increase_velocity(game_state);
 
+        // Update direction
         game_state.player.last_key = Some(Key::D);
         game_state.player.direction = Right;
 
         // Initialize a new field to track the frame count
         game_state.player.right_increment_frame_count += 1;
 
+        // Cycle through the sprite map for walking right
+        Self::advance_walking_animation(game_state);
+
+        // Play footstep sound if one is eligible to do so
+        if game_state.footstep_active {
+            play_footstep_sound(game_state, sink);
+        }
+
+    }
+}
+
+impl MoveRight {
+    fn advance_walking_animation(game_state: &mut GameState) {
         if game_state.player.right_increment_frame_count >= 3 {
             game_state.player.right_increment_frame_count = 0; // Reset the frame count
 
@@ -32,10 +46,5 @@ impl InputLogic for MoveRight {
                 }
             }
         }
-
-        if game_state.footstep_active {
-            play_footstep_sound(game_state, sink);
-        }
-
     }
 }
