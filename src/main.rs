@@ -39,29 +39,9 @@ fn main() {
     let mut map_two_obstacles = extract_obstacles(&map_two_tiles, false);
     let mut map_three_obstacles = extract_obstacles(&map_three_tiles, false);
 
-    // output obstacle one info for debugging
-    for obstacle in &map_one_obstacles {
-        println!(
-            "Obstacle one info: ID: {:?}, X.LEFT: {}, X.RIGHT: {}, Y.BOTTOM: {}, Y.TOP: {}, ACTIVE: {}, DURABILITY: {}, FALLING: {}, VELOCITY_Y: {}, LEFT_OBSTACLE: {:?}, RIGHT_OBSTACLE: {:?}, OVER_OBSTACLE: {:?}, UNDER_OBSTACLE: {:?}, IS_BOTTOM_OBSTACLE: {}, IS_TOP_OBSTACLE: {}, IS_LEFTMOST_OBSTACLE: {}, IS_RIGHTMOST_OBSTACLE: {}",
-            obstacle.id,
-            obstacle.x_left,
-            obstacle.x_right,
-            obstacle.y_bottom,
-            obstacle.y_top,
-            obstacle.active,
-            obstacle.durability,
-            obstacle.falling,
-            obstacle.velocity_y,
-            obstacle.left_obstacle,
-            obstacle.right_obstacle,
-            obstacle.over_obstacle,
-            obstacle.under_obstacle,
-            obstacle.is_bottom_obstacle,
-            obstacle.is_top_obstacle,
-            obstacle.is_leftmost_obstacle,
-            obstacle.is_rightmost_obstacle
-        );
-    }
+    print_obstacles(&mut map_one_obstacles, "1");
+    print_obstacles(&mut map_two_obstacles, "2");
+    print_obstacles(&mut map_three_obstacles, "3");
 
     let fullscreen = false;
 
@@ -148,6 +128,33 @@ fn main() {
     };
 
     start_event_loop(game_state, input_logic, core_logic, &mut sink);
+}
+
+fn print_obstacles(map_one_obstacles: &mut Vec<Obstacle>, id: &str) {
+    println!("------------------------- {id} -----------------------------");
+    // output obstacle one info for debugging
+    for obstacle in map_one_obstacles {
+        println!(
+            "Obstacle one info: ID: {:?}, X.LEFT: {}, X.RIGHT: {}, Y.BOTTOM: {}, Y.TOP: {}, ACTIVE: {}, DURABILITY: {}, FALLING: {}, VELOCITY_Y: {}, LEFT_OBSTACLE: {:?}, RIGHT_OBSTACLE: {:?}, OVER_OBSTACLE: {:?}, UNDER_OBSTACLE: {:?}, IS_BOTTOM_OBSTACLE: {}, IS_TOP_OBSTACLE: {}, IS_LEFTMOST_OBSTACLE: {}, IS_RIGHTMOST_OBSTACLE: {}",
+            obstacle.id,
+            obstacle.x_left,
+            obstacle.x_right,
+            obstacle.y_bottom,
+            obstacle.y_top,
+            obstacle.active,
+            obstacle.durability,
+            obstacle.falling,
+            obstacle.velocity_y,
+            obstacle.left_obstacle,
+            obstacle.right_obstacle,
+            obstacle.over_obstacle,
+            obstacle.under_obstacle,
+            obstacle.is_bottom_obstacle,
+            obstacle.is_top_obstacle,
+            obstacle.is_leftmost_obstacle,
+            obstacle.is_rightmost_obstacle
+        );
+    }
 }
 
 fn load_sound(path: &str) -> Vec<u8> {
@@ -253,21 +260,25 @@ fn extract_obstacles(grid: &Vec<Tile>, sort_by_y: bool) -> Vec<Obstacle> {
 
         for j in 0..obstacles.len() {
             if i != j {
-                if obstacles[j].y_bottom > obstacles[i].y_bottom {
-                    obstacles[i].under_obstacle = Some(obstacles[j].id);
-                    is_bottom = false;
+                if obstacles[j].x_left < obstacles[i].x_right && obstacles[j].x_right > obstacles[i].x_left {
+                    if obstacles[j].y_bottom > obstacles[i].y_bottom {
+                        obstacles[i].under_obstacle = Some(obstacles[j].id);
+                        is_bottom = false;
+                    }
+                    if obstacles[j].y_top < obstacles[i].y_top {
+                        obstacles[i].over_obstacle = Some(obstacles[j].id);
+                        is_top = false;
+                    }
                 }
-                if obstacles[j].y_top < obstacles[i].y_top {
-                    obstacles[i].over_obstacle = Some(obstacles[j].id);
-                    is_top = false;
-                }
-                if obstacles[j].x_right < obstacles[i].x_left {
-                    obstacles[i].left_obstacle = Some(obstacles[j].id);
-                    is_leftmost = false;
-                }
-                if obstacles[j].x_left > obstacles[i].x_right {
-                    obstacles[i].right_obstacle = Some(obstacles[j].id);
-                    is_rightmost = false;
+                if obstacles[j].y_bottom < obstacles[i].y_top && obstacles[j].y_top > obstacles[i].y_bottom {
+                    if obstacles[j].x_right < obstacles[i].x_left {
+                        obstacles[i].left_obstacle = Some(obstacles[j].id);
+                        is_leftmost = false;
+                    }
+                    if obstacles[j].x_left > obstacles[i].x_right {
+                        obstacles[i].right_obstacle = Some(obstacles[j].id);
+                        is_rightmost = false;
+                    }
                 }
             }
         }
@@ -276,52 +287,18 @@ fn extract_obstacles(grid: &Vec<Tile>, sort_by_y: bool) -> Vec<Obstacle> {
         obstacles[i].is_top_obstacle = is_top;
         obstacles[i].is_leftmost_obstacle = is_leftmost;
         obstacles[i].is_rightmost_obstacle = is_rightmost;
+
+
+        // Ensure the obstacle is marked as both top and bottom if it is alone
+        if is_bottom && is_top {
+            obstacles[i].is_bottom_obstacle = true;
+            obstacles[i].is_top_obstacle = true;
+        }
     }
 
 
     obstacles
    }
-
-pub fn sort_obstacles_by_y(mut obstacles: Vec<Obstacle>) -> Vec<Obstacle> {
-        // Sort by Y position
-        for i in 1..obstacles.len() {
-            let mut j = i;
-            while j > 0 && obstacles[j - 1].y_bottom < obstacles[j].y_bottom {
-                obstacles.swap(j, j - 1);
-                j -= 1;
-            }
-        }
-    obstacles
-}
-
-fn print_grid(grid: &Vec<Tile>) {
-    let mut grid_2d: Vec<Vec<String>> = vec![vec![String::new(); 16]; 16];
-    for tile in grid {
-        let x = (tile.x_left / 16.0) as usize;
-        let y = (tile.y_bottom / 16.0) as usize;
-        grid_2d[y][x] = match tile.tile_type {
-            TileType::Obstacle => "X".to_string(),
-            TileType::Grass => "G".to_string(),
-            TileType::Sky => "O".to_string(),
-            TileType::Unknown => "?".to_string(),
-        };
-    }
-    for row in grid_2d {
-        for cell in row {
-            print!("{} ", cell);
-        }
-        println!();
-    }
-}
-
-/// Searches for obstacles in the grid and outputs their positions.
-fn find_obstacles(grid: &Vec<Tile>) {
-    for tile in grid {
-        if let TileType::Obstacle = tile.tile_type {
-            // println!("Obstacle found: X.LEFT {}, X.RIGHT {}, Y.BOTTOM {}, Y.TOP {}", tile.x_left, tile.x_right, tile.y_bottom, tile.y_top);
-        }
-    }
-}
 
 #[derive(Debug)]
 pub enum TileType {
