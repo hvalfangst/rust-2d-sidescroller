@@ -1,6 +1,8 @@
+use rodio::Sink;
 use crate::audio::engine::append_source_source;
 use crate::graphics::sprites::SpriteMaps;
-use crate::state::{GameState, Obstacle, ACCELERATION, FALL_MILD_SOUND, GROUND, MAX_VELOCITY};
+use crate::state::{Direction, GameState, Obstacle, ACCELERATION, FALL_MILD_SOUND, GROUND, MAX_VELOCITY};
+use crate::state::core_logic::CoreLogic;
 use crate::state::player::{Player, PlayerState};
 
 pub fn jump_obstacles(mut game_state: &mut GameState, sink: &mut rodio::Sink) {
@@ -144,4 +146,17 @@ pub fn check_collision(obstacles: &Vec<Obstacle>, sprites: &SpriteMaps, player: 
     }
 
     (collision, collision_id)
+}
+
+pub struct ModifyPosition;
+
+impl CoreLogic for ModifyPosition {
+    fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
+        if game_state.player.direction == Direction::Left {
+            game_state.player.x -= game_state.player.vx;
+        } else {
+            game_state.player.x += game_state.player.vx;
+        }
+        game_state.player.y += game_state.player.vy;
+    }
 }

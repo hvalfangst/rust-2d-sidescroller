@@ -49,23 +49,30 @@ impl Kick {
 
             append_source_source(&game_state, sink, KICK_BOX_SOUND, 1000);
 
-            // Shift all boxes above the removed box down by 16 pixels
-            for i in 0..game_state.all_maps[game_state.current_map_index].obstacles.len() {
-                println!("Box id: {}", i);
+            // Only bottom obstacles will have their above boxes fall
+            if game_state.all_maps[game_state.current_map_index].obstacles[box_index].is_bottom_obstacle {
+                // Shift all boxes above the removed box down by 16 pixels
+                for i in 0..game_state.all_maps[game_state.current_map_index].obstacles.len() {
+                    println!("Box id: {}", i);
 
-                let obstacle = &mut game_state.all_maps[game_state.current_map_index].obstacles[i];
-                println!("Box {} x_left: {}, x_right: {}", i, obstacle.x_left, obstacle.x_right);
-                if obstacle.x_left >= removed_box_x_left && obstacle.x_right <= removed_box_x_right { //&& obstacle.y_top < removed_box_y_top {
-                    obstacle.falling = true;
-                    obstacle.velocity_y = 0.0;
-                    println!("Box {} is falling", i);
-                    // Remove the box
-                    to_remove = true;
-                } else {
-                    println!("Box {} is not falling. obs.x_left: {} removed.x_left: {} obs.x_right {} removed.x_right {}", i, obstacle.x_left, removed_box_x_left, obstacle.x_right, removed_box_x_right);
+                    let obstacle = &mut game_state.all_maps[game_state.current_map_index].obstacles[i];
+                    println!("Box {} x_left: {}, x_right: {}", i, obstacle.x_left, obstacle.x_right);
+                    if obstacle.x_left >= removed_box_x_left && obstacle.x_right <= removed_box_x_right {
+                        obstacle.falling = true;
+                        obstacle.velocity_y = 0.0;
+                        println!("Box {} is falling", i);
+                        // Remove the box
+                        to_remove = true;
+                    } else {
+                        println!("Box {} is not falling. obs.x_left: {} removed.x_left: {} obs.x_right {} removed.x_right {}", i, obstacle.x_left, removed_box_x_left, obstacle.x_right, removed_box_x_right);
+                    }
                 }
+            } else {
+                to_remove = true;
             }
+
         }
+
         if to_remove {
             game_state.all_maps[game_state.current_map_index].obstacles.remove(box_index);
             println!("Box {} removed", box_index);

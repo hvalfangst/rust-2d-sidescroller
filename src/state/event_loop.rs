@@ -33,7 +33,7 @@ pub fn start_event_loop(mut game_state: GameState, input_logic_map: InputLogicMa
         let any_key_pressed = handle_user_input(&mut game_state, &input_logic_map, sink);
 
         // Process game logic such as obstacle detection, physics, sounds etc.
-        execute_core_logic(&mut game_state, &core_logic_map, sink, any_key_pressed);
+        execute_core_logic(&mut game_state, &core_logic_map, sink);
 
         // Change grass sprite every second - alternate between 0 and 1
         if last_grass_sprite_index_change.elapsed() >= BACKGROUND_CHANGE_INTERVAL {

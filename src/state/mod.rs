@@ -10,6 +10,8 @@ pub mod event_loop;
 pub mod player;
 pub mod core_logic;
 pub mod physics;
+mod gravity;
+mod collision;
 
 const FRAME_DURATION: Duration = Duration::from_nanos(16666667); // 16.6666667 ms = 60 FPS
 const BACKGROUND_CHANGE_INTERVAL: Duration = Duration::from_secs(1);
