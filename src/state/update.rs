@@ -93,8 +93,7 @@ fn draw_game_world(game_state: &mut GameState) {
     // Then draw the sky, which alternates between four sprites to emulate clouds
     draw_sprite(0, 0, &game_state.sprites.sky[game_state.sky_sprite_index], game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
 
-
-
+    // Draw the obstacles, which in this case are metal boxes that have 3 different sprites based on durability
     game_state.all_maps[game_state.current_map_index].obstacles.iter().enumerate().for_each(|(index, obstacle)| {
         if obstacle.active {
             let metal_box_sprite =
@@ -111,8 +110,4 @@ fn draw_game_world(game_state: &mut GameState) {
 
     });
 
-
-    if game_state.player.game_over {
-        draw_sprite(0, 0, &game_state.sprites.game_over[game_state.game_over_index], game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
-    }
 }

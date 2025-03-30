@@ -43,7 +43,8 @@ pub enum PlayerState {
         pub above_obstacle: bool,
         pub current_map: usize,
         pub spike_active: bool,
-        pub game_over: bool
+        pub game_over: bool,
+        pub obstacle_detected: bool
     }
 
 impl Player {
@@ -74,7 +75,8 @@ impl Player {
             above_obstacle: false,
             current_map: 1,
             spike_active: false,
-            game_over: false
+            game_over: false,
+            obstacle_detected: false
         }
     }
 }

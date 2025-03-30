@@ -15,11 +15,6 @@ pub fn execute_core_logic(game_state: &mut GameState, core_logic_operations: &Ha
     for (_, core_logic_operation) in core_logic_operations.iter() {
         core_logic_operation.borrow().execute(game_state, sink);
     }
-
-    // if !any_key_pressed {
-    //     apply_friction(game_state);
-        // sink.stop();
-    // }
 }
 
 pub trait CoreLogic {
@@ -36,6 +31,9 @@ impl CoreLogic for CollisionDetection {
 
         if obstacle {
             game_state.player.vx = 0.0;
+            game_state.player.obstacle_detected = true;
+        } else {
+            game_state.player.obstacle_detected = false;
         }
 
     }
@@ -56,21 +54,19 @@ impl CoreLogic for ApplyGravity {
         for obstacle in game_state.all_maps[game_state.current_map_index].obstacles.iter_mut() {
             if obstacle.active && obstacle.falling {
                 if obstacle.velocity_y >= 16.0 {
-                    // println!("obstacle.velocity_y: {}", obstacle.velocity_y);
                     obstacle_landed = true;
                     obstacle.falling = false;
                 } else {
                     obstacle.y_bottom += GRAVITY * 3.0;
                     obstacle.y_top += GRAVITY * 3.0;
                     obstacle.velocity_y += GRAVITY * 3.0;
-                    // println!("obstacle.y_bottom: {}, obstacle.y_top: {}", obstacle.y_bottom, obstacle.y_top);
                 }
             }
         }
 
         if obstacle_landed {
-            let file = &game_state.sounds[DOWN_SOUND]; // Get the raw sound data (Vec<u8>)
-            let cursor = Cursor::new(file.clone()); // Clone to create an owned Cursor<Vec<u8>>
+            let file = &game_state.sounds[DOWN_SOUND];
+            let cursor = Cursor::new(file.clone());
 
             let source = rodio::Decoder::new(BufReader::new(cursor))
                 .unwrap()
@@ -78,8 +74,6 @@ impl CoreLogic for ApplyGravity {
 
             sink.append(source); // Play the sound
 
-            // TODO
-            // Sort obstacles by DESC by y_bottom, meaning the highest obstacles will be put first in the vector (due to polar coordinates)
             game_state.all_maps[game_state.current_map_index].obstacles.sort_by(|a, b| a.y_bottom.partial_cmp(&b.y_bottom).unwrap());
         }
     }

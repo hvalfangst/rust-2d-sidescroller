@@ -39,12 +39,7 @@ impl InputLogic for MoveLeft {
     fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
 
         // Update velocity if no collision is detected
-        game_state.player.vx += ACCELERATION * 0.5;
-        if game_state.player.vx > MAX_VELOCITY {
-            game_state.player.vx = MAX_VELOCITY;
-        } else {
-            game_state.player.vx *= 0.98;
-        }
+        update_velocity(game_state);
 
         game_state.player.last_key = Some(Key::A);
         game_state.player.direction = Left;
@@ -77,12 +72,7 @@ impl InputLogic for MoveRight {
     fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
 
         // Update velocity
-        game_state.player.vx += ACCELERATION * 0.5;
-        if game_state.player.vx > MAX_VELOCITY {
-            game_state.player.vx = MAX_VELOCITY;
-        } else {
-            game_state.player.vx *= 0.98;
-        }
+       update_velocity(game_state);
 
         game_state.player.last_key = Some(Key::D);
         game_state.player.direction = Right;
@@ -254,4 +244,20 @@ pub fn initialize_input_logic_map() -> InputLogicMap {
     logic_map.insert(Key::X, Arc::new(Kick));
 
     logic_map
+}
+
+pub fn update_velocity(game_state: &mut GameState) {
+    game_state.player.vx += ACCELERATION;
+    if game_state.player.obstacle_detected {
+        game_state.player.vx = 0.0;
+    } else {
+        if game_state.player.vx > MAX_VELOCITY {
+            game_state.player.vx = MAX_VELOCITY;
+        } else {
+            game_state.player.vx *= 0.98;
+            if game_state.player.vx > MAX_VELOCITY {
+                game_state.player.vx = MAX_VELOCITY;
+            }
+        }
+    }
 }
