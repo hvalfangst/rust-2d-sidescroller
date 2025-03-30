@@ -1,15 +1,14 @@
 use crate::audio::engine::append_source_source;
 use crate::graphics::render_graphics::render_pixel_buffer;
 use crate::graphics::update_graphics::update_pixel_buffer;
-use crate::input::input_logic::check_collision;
 use crate::state::player::Player;
-use crate::state::{jump_obstacles, Direction, GameState, DOWN_SOUND, GRAVITY, GROUND, LOWER_BOUND, UPPER_BOUND};
+use crate::state::{Direction, GameState, DOWN_SOUND, GRAVITY, GROUND, LOWER_BOUND, UPPER_BOUND};
 use rodio::Sink;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::thread::sleep;
-
+use crate::state::physics::{check_collision, jump_obstacles};
 
 pub fn execute_core_logic(game_state: &mut GameState, core_logic_operations: &HashMap<String, Rc<RefCell<dyn CoreLogic>>>, sink: &mut Sink, any_key_pressed: bool) {
     for (_, core_logic_operation) in core_logic_operations.iter() {

@@ -11,7 +11,7 @@ use crate::state::{BACKGROUND_CHANGE_INTERVAL, GameState};
 use crate::state::core_logic::{execute_core_logic, CoreLogic};
 use crate::state::FRAME_DURATION;
 use crate::graphics::update_graphics::update_pixel_buffer;
-use crate::input::input_logic::{handle_user_input, InputLogicMap};
+use crate::input::handler::{handle_user_input, InputLogicMap};
 
 pub fn start_event_loop(mut game_state: GameState, input_logic_map: InputLogicMap, core_logic_map: HashMap<String, Rc<RefCell<dyn CoreLogic>>>, sink: &mut rodio::Sink) {
 

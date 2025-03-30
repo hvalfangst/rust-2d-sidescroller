@@ -7,17 +7,18 @@ use winit::event_loop::EventLoop;
 use winit::monitor::MonitorHandle;
 
 use crate::state::player::Player;
-use crate::state::{GameState, Map, Obstacle, ObstacleId, Viewport};
+use crate::state::{GameState, Map, Obstacle, ObstacleId};
 use crate::{
     graphics::sprites::SpriteMaps,
     state::core_logic::initialize_core_logic_map,
     state::event_loop::start_event_loop,
 };
 use rodio::{OutputStream, Sink};
-use input::input_logic::initialize_input_logic_map;
+use input::handler::initialize_input_logic_map;
 use crate::graphics::{SCALED_WINDOW_HEIGHT, SCALED_WINDOW_WIDTH};
 
-mod state;mod graphics;
+mod state;
+mod graphics;
 mod audio;
 mod input;
 
@@ -118,7 +119,6 @@ fn main() {
         window: &mut window,
         scaled_buffer: &mut scaled_buffer,
         game_over_index: 0,
-        viewport: Viewport::new(window_width as f32, window_height as f32),
         all_maps,
         current_map_index: 0,
         footstep_index: 0,
