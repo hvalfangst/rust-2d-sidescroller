@@ -1,4 +1,5 @@
-pub mod sprites; pub mod renderer;
+pub mod sprites; pub mod render_graphics;
+pub mod update_graphics;
 
 pub const SCALED_WINDOW_WIDTH: usize = 640;
 pub const SCALED_WINDOW_HEIGHT: usize = 480;

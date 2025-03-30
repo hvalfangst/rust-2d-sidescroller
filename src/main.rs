@@ -2,7 +2,6 @@ use std::fs::File;
 use std::io;
 use std::io::{BufRead, Read};
 use std::path::Path;
-use std::process::exit;
 use minifb::{Window, WindowOptions};
 use winit::event_loop::EventLoop;
 use winit::monitor::MonitorHandle;
@@ -11,16 +10,16 @@ use crate::state::player::Player;
 use crate::state::{GameState, Map, Obstacle, ObstacleId, Viewport};
 use crate::{
     graphics::sprites::SpriteMaps,
-    state::event_loop::start_event_loop,
-    state::input_logic::initialize_input_logic_map,
     state::core_logic::initialize_core_logic_map,
+    state::event_loop::start_event_loop,
 };
 use rodio::{OutputStream, Sink};
+use input::input_logic::initialize_input_logic_map;
 use crate::graphics::{SCALED_WINDOW_HEIGHT, SCALED_WINDOW_WIDTH};
 
 mod state;mod graphics;
-
-
+mod audio;
+mod input;
 
 fn main() {
     // Initialize the audio output stream and sink
@@ -227,6 +226,7 @@ fn read_grid_from_file(filename: &str) -> io::Result<(Vec<Tile>, usize, usize)> 
 
 fn extract_obstacles(grid: &Vec<Tile>, sort_by_y: bool) -> Vec<Obstacle> {
     let mut obstacles = Vec::new();
+
     for tile in grid {
         if let TileType::Obstacle = tile.tile_type {
             obstacles.push(Obstacle {
@@ -295,7 +295,6 @@ fn extract_obstacles(grid: &Vec<Tile>, sort_by_y: bool) -> Vec<Obstacle> {
             obstacles[i].is_top_obstacle = true;
         }
     }
-
 
     obstacles
    }

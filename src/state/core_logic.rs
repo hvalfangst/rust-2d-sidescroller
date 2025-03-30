@@ -1,14 +1,14 @@
+use crate::audio::engine::append_source_source;
+use crate::graphics::render_graphics::render_pixel_buffer;
+use crate::graphics::update_graphics::update_pixel_buffer;
+use crate::input::input_logic::check_collision;
+use crate::state::player::Player;
+use crate::state::{jump_obstacles, Direction, GameState, DOWN_SOUND, GRAVITY, GROUND, LOWER_BOUND, UPPER_BOUND};
+use rodio::Sink;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::io::{BufReader, Cursor};
 use std::rc::Rc;
 use std::thread::sleep;
-use crate::state::{jump_obstacles, Direction, GameState, DOWN_SOUND, GRAVITY, GROUND, LOWER_BOUND, UPPER_BOUND};
-use rodio::{Sink, Source};
-use crate::graphics::renderer::render_pixel_buffer;
-use crate::state::input_logic::check_collision;
-use crate::state::player::Player;
-use crate::state::update::update_pixel_buffer;
 
 
 pub fn execute_core_logic(game_state: &mut GameState, core_logic_operations: &HashMap<String, Rc<RefCell<dyn CoreLogic>>>, sink: &mut Sink, any_key_pressed: bool) {
@@ -65,14 +65,7 @@ impl CoreLogic for ApplyGravity {
         }
 
         if obstacle_landed {
-            let file = &game_state.sounds[DOWN_SOUND];
-            let cursor = Cursor::new(file.clone());
-
-            let source = rodio::Decoder::new(BufReader::new(cursor))
-                .unwrap()
-                .take_duration(std::time::Duration::from_millis(3000));
-
-            sink.append(source); // Play the sound
+            append_source_source(&game_state, sink, DOWN_SOUND, 3000);
 
             game_state.all_maps[game_state.current_map_index].obstacles.sort_by(|a, b| a.y_bottom.partial_cmp(&b.y_bottom).unwrap());
         }

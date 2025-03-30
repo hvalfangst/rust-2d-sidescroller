@@ -107,7 +107,6 @@ fn draw_game_world(game_state: &mut GameState) {
 
             draw_sprite(obstacle.x_left as usize, obstacle.y_bottom as usize, metal_box_sprite, game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
         }
-
     });
 
 }

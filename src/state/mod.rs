@@ -6,37 +6,36 @@ use crate::state::player::{Player, PlayerState};
 use crate::Tile;
 use minifb::Window;
 use rodio::Source;
+use crate::audio::engine::append_source_source;
 
 pub mod event_loop;
-pub mod update;
 pub mod player;
-pub(crate) mod input_logic;
 pub(crate) mod core_logic;
 
 const FRAME_DURATION: Duration = Duration::from_nanos(16666667); // 16.6666667 ms = 60 FPS
 const BACKGROUND_CHANGE_INTERVAL: Duration = Duration::from_secs(1);
 
 const GRAVITY: f32 = 0.5;
-const JUMP_VELOCITY: f32 = -5.0;
-const MAX_VELOCITY: f32 = 2.0;
-const ACCELERATION: f32 = 0.1;
+pub(crate) const JUMP_VELOCITY: f32 = -5.0;
+pub(crate) const MAX_VELOCITY: f32 = 2.0;
+pub(crate) const ACCELERATION: f32 = 0.1;
 const FRICTION: f32 = 0.2;
-const GROUND: f32 = 205.0;
+pub const GROUND: f32 = 205.0;
 const LOWER_BOUND: f32 = 0.0;
 const UPPER_BOUND: f32 = 225.0;
-const KICK_FRAME_DURATION: u32 = 8;
+pub const KICK_FRAME_DURATION: u32 = 8;
 
-const WALK_SOUND_1: usize = 0;
-const WALK_SOUND_2: usize = 1;
-const WALK_SOUND_3: usize = 2;
-const WALK_SOUND_4: usize = 3;
-const JUMP_SOUND: usize = 4;
+pub(crate) const WALK_SOUND_1: usize = 0;
+pub(crate) const WALK_SOUND_2: usize = 1;
+pub(crate) const WALK_SOUND_3: usize = 2;
+pub(crate) const WALK_SOUND_4: usize = 3;
+pub(crate) const JUMP_SOUND: usize = 4;
 const FALL_MILD_SOUND: usize = 5;
 const FALL_HEAVY_SOUND: usize = 6;
 const DOWN_SOUND: usize = 7;
 const EXPLOSION_SOUND: usize = 8;
-const KICK_SOUND: usize = 9;
-const KICK_BOX_SOUND: usize = 10;
+pub(crate) const KICK_SOUND: usize = 9;
+pub(crate) const KICK_BOX_SOUND: usize = 10;
 
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -132,14 +131,7 @@ pub fn jump_obstacles(mut game_state: &mut GameState, sink: &mut rodio::Sink) {
             game_state.player.is_jumping = false;
 
             if game_state.player.state == PlayerState::InAir {
-                let file = &game_state.sounds[FALL_MILD_SOUND]; // Get the raw sound data (Vec<u8>)
-                let cursor = Cursor::new(file.clone()); // Clone to create an owned Cursor<Vec<u8>>
-
-                let source = rodio::Decoder::new(BufReader::new(cursor))
-                    .unwrap()
-                    .take_duration(std::time::Duration::from_millis(2500));
-
-                sink.append(source); // Play the sound
+                append_source_source(&game_state, sink, FALL_MILD_SOUND, 2500);
             }
 
             game_state.player.state = PlayerState::OnGround;
@@ -180,7 +172,7 @@ impl Viewport {
     }
 }
 
-fn remove_box(game_state: &mut GameState, box_index: usize, sink: &mut rodio::Sink) {
+pub fn remove_box(game_state: &mut GameState, box_index: usize, sink: &mut rodio::Sink) {
     println!("Removing box {}", box_index);
     let mut to_remove = false;
     if game_state.all_maps[game_state.current_map_index].obstacles[box_index].active {
@@ -191,19 +183,9 @@ fn remove_box(game_state: &mut GameState, box_index: usize, sink: &mut rodio::Si
         let removed_box_y_top = game_state.all_maps[game_state.current_map_index].obstacles[box_index].y_top;
 
         println!("Box x_left: {}, x_right: {}", removed_box_x_left, removed_box_x_right);
-
-        // Remove the box
-
         println!("Box {} removed", box_index);
 
-        let file = &game_state.sounds[KICK_BOX_SOUND]; // Get the raw sound data (Vec<u8>)
-        let cursor = Cursor::new(file.clone()); // Clone to create an owned Cursor<Vec<u8>>
-
-        let source = rodio::Decoder::new(BufReader::new(cursor))
-            .unwrap()
-            .take_duration(std::time::Duration::from_millis(1000));
-
-        sink.append(source); // Play the sound
+        append_source_source(&game_state, sink, KICK_BOX_SOUND, 1000);
 
         // Shift all boxes above the removed box down by 16 pixels
         for i in 0..game_state.all_maps[game_state.current_map_index].obstacles.len() {

@@ -1,12 +1,12 @@
-use std::collections::HashMap;
-use std::io::{BufReader, Cursor};
-use std::sync::Arc;
+use crate::audio::engine::append_source_source;
+use crate::graphics::sprites::SpriteMaps;
+use crate::state::player::Player;
+use crate::state::Direction::{Left, Right};
 use crate::state::{remove_box, GameState, Obstacle, ACCELERATION, JUMP_SOUND, JUMP_VELOCITY, KICK_BOX_SOUND, KICK_SOUND, MAX_VELOCITY, WALK_SOUND_1, WALK_SOUND_2, WALK_SOUND_3, WALK_SOUND_4};
 use minifb::{Key, KeyRepeat};
-use rodio::{Sink, Source};
-use crate::graphics::sprites::SpriteMaps;
-use crate::state::Direction::{Left, Right};
-use crate::state::player::Player;
+use rodio::Sink;
+use std::collections::HashMap;
+use std::sync::Arc;
 
 pub fn handle_user_input(game_state: &mut GameState, commands: &InputLogicMap, sink: &mut Sink) -> bool {
     let legal_keys = [Key::Space, Key::D, Key::A, Key::X];
@@ -23,7 +23,7 @@ pub fn handle_user_input(game_state: &mut GameState, commands: &InputLogicMap, s
         }
     }
 
-    // If no movement key was pressed, decelerate the player to avoid sliding forever
+    // If no legal was pressed, decelerate the player to avoid sliding forever
     if !any_key_pressed {
         decelerate_velocity(game_state);
     }
@@ -129,10 +129,9 @@ pub fn check_collision(obstacles: &Vec<Obstacle>, sprites: &SpriteMaps, player: 
         if player_x > obstacle.x_left && player_x < obstacle.x_right {
             println!("Collision of x axis detected: player_x: {}, obstacle.x_left: {}, obstacle.x_right: {}", player_x, obstacle.x_left, obstacle.x_right);
 
-            let magica = 25.0;
-            if player.y >= obstacle.y_top + magica && player.y <= obstacle.y_bottom + magica {
+            if player.y >= obstacle.y_top + 25.0 && player.y <= obstacle.y_bottom + 25.0 {
                 collision_id = Some(index);
-                println!("Collision detected with obstacle id {:?} x.left {}, x.right: {}, obstacle.y_bottom: {}, obstacle.y_top: {}", obstacle.id, obstacle.x_left, obstacle.x_right , obstacle.y_bottom + magica, obstacle.y_top + magica);
+                println!("Collision detected with obstacle id {:?} x.left {}, x.right: {}, obstacle.y_bottom: {}, obstacle.y_top: {}", obstacle.id, obstacle.x_left, obstacle.x_right , obstacle.y_bottom + 25.0, obstacle.y_top + 25.0);
                 true
             } else {
                 false
@@ -143,7 +142,6 @@ pub fn check_collision(obstacles: &Vec<Obstacle>, sprites: &SpriteMaps, player: 
     });
 
     if let Some(id) = collision_id {
-        // println!("Collision detected at x: {}, y: {}, with obstacle id: {}", player.x, player.y, id);
     }
 
     (collision, collision_id)
@@ -161,16 +159,7 @@ impl InputLogic for Jump {
             game_state.player.is_jumping = true;
             game_state.player.last_key = Some(Key::Space);
 
-
-            let file = &game_state.sounds[JUMP_SOUND]; // Get the raw sound data (Vec<u8>)
-            let cursor = Cursor::new(file.clone()); // Clone to create an owned Cursor<Vec<u8>>
-
-            let source = rodio::Decoder::new(BufReader::new(cursor))
-                .unwrap()
-                .take_duration(std::time::Duration::from_millis(1500));
-
-            sink.append(source); // Play the sound
-
+            append_source_source(&game_state, sink, JUMP_SOUND, 1500);
         }
     }
 }
@@ -182,45 +171,27 @@ impl InputLogic for Kick {
         game_state.player.is_kicking = true;
         game_state.player.kick_frame = 0;
         game_state.player.kick_frame_timer = 0;
-        // TODO: Need to fix this as it currently fucks up everything
-
-        // let sorted_obstacles = sort_obstacles_by_y(game_state.all_maps[game_state.current_map_index].obstacles);
 
         let (collision, id) = check_collision(game_state.all_maps[game_state.current_map_index].obstacles, &game_state.sprites, &game_state.player, game_state.player.direction == Left);
 
-        // Check if the player is adjacent to an obstacle to the right
+        // Check if the player is adjacent to an obstacle
         if collision {
+            append_source_source(&game_state, sink, KICK_BOX_SOUND, 1000);
 
-            let file = &game_state.sounds[KICK_BOX_SOUND]; // Get the raw sound data (Vec<u8>)
-            let cursor = Cursor::new(file.clone()); // Clone to create an owned Cursor<Vec<u8>>
-
-            let source = rodio::Decoder::new(BufReader::new(cursor))
-                .unwrap()
-                .take_duration(std::time::Duration::from_millis(1000));
-
-            sink.append(source); // Play the sound
-
-            // println!("Player is adjacent to an obstacle with id {} to the right.", id.unwrap());
             if game_state.all_maps[game_state.current_map_index].obstacles[id.unwrap()].durability > 0 {
-                // println!("Obstacle durability: {}", game_state.all_maps[game_state.current_map_index].obstacles[id.unwrap()].durability);
                 game_state.all_maps[game_state.current_map_index].obstacles[id.unwrap()].durability -= 1;
             } else {
-                // println!("Obstacle durability: 0");
+
                 remove_box(game_state, id.unwrap(), sink);
             }
 
         } else {
-            let file = &game_state.sounds[KICK_SOUND]; // Get the raw sound data (Vec<u8>)
-            let cursor = Cursor::new(file.clone()); // Clone to create an owned Cursor<Vec<u8>>
-
-            let source = rodio::Decoder::new(BufReader::new(cursor))
-                .unwrap()
-                .take_duration(std::time::Duration::from_millis(1000));
-
-            sink.append(source); // Play the sound
+            append_source_source(&game_state, sink, KICK_SOUND, 1000);
         }
     }
 }
+
+
 
 fn play_footstep_sound(game_state: &mut GameState, sink: &mut Sink) {
     if game_state.footstep_index == 4 { game_state.footstep_index = 0; } else { game_state.footstep_index += 1; }
@@ -232,14 +203,7 @@ fn play_footstep_sound(game_state: &mut GameState, sink: &mut Sink) {
         _ => WALK_SOUND_4,
     };
 
-    let file = &game_state.sounds[sound_index]; // Get the raw sound data (Vec<u8>)
-    let cursor = Cursor::new(file.clone()); // Clone to create an owned Cursor<Vec<u8>>
-
-    let source = rodio::Decoder::new(BufReader::new(cursor))
-        .unwrap()
-        .take_duration(std::time::Duration::from_millis(200));
-
-    sink.append(source); // Play the sound
+    append_source_source(&game_state, sink, sound_index, 200);
 }
 
 pub type InputLogicMap = HashMap<Key, Arc<dyn InputLogic>>;
@@ -257,6 +221,7 @@ pub fn initialize_input_logic_map() -> InputLogicMap {
 
 pub fn update_velocity(game_state: &mut GameState) {
     game_state.player.vx += ACCELERATION;
+
     if game_state.player.obstacle_detected {
         game_state.player.vx = 0.0;
     } else {
