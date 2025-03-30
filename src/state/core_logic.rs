@@ -50,7 +50,7 @@ impl CoreLogic for ApplyGravity {
 
         let mut obstacle_landed = false;
 
-        // Apply gravity to all obstacles which have falling boolean
+        // Apply gravity to all obstacles which has the falling boolean
         for obstacle in game_state.all_maps[game_state.current_map_index].obstacles.iter_mut() {
             if obstacle.active && obstacle.falling {
                 if obstacle.velocity_y >= 16.0 {

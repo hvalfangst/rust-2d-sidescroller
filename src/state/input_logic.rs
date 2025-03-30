@@ -11,12 +11,21 @@ use crate::state::player::Player;
 pub fn handle_user_input(game_state: &mut GameState, commands: &InputLogicMap, sink: &mut Sink) -> bool {
     let legal_keys = [Key::Space, Key::D, Key::A, Key::X];
     let mut any_key_pressed = false;
+    let mut movement_key_pressed = false;
 
     for key in legal_keys.iter() {
         if game_state.window.is_key_pressed(*key, KeyRepeat::Yes) {
             any_key_pressed = true;
+            if *key == Key::A || *key == Key::D {
+                movement_key_pressed = true;
+            }
             delegate_command(*key, &commands, game_state, sink);
         }
+    }
+
+    // If no movement key was pressed, decelerate the player to avoid sliding forever
+    if !movement_key_pressed {
+        decelerate_velocity(game_state);
     }
 
     any_key_pressed
@@ -259,5 +268,12 @@ pub fn update_velocity(game_state: &mut GameState) {
                 game_state.player.vx = MAX_VELOCITY;
             }
         }
+    }
+}
+
+fn decelerate_velocity(game_state: &mut GameState) {
+    game_state.player.vx *= 0.95;
+    if game_state.player.vx.abs() < 0.1 {
+        game_state.player.vx = 0.0;
     }
 }
