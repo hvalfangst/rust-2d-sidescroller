@@ -24,7 +24,7 @@ pub fn handle_user_input(game_state: &mut GameState, commands: &InputLogicMap, s
     }
 
     // If no movement key was pressed, decelerate the player to avoid sliding forever
-    if !movement_key_pressed {
+    if !any_key_pressed {
         decelerate_velocity(game_state);
     }
 
