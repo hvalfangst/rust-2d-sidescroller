@@ -1,8 +1,9 @@
 use crate::audio::engine::append_source_source;
 use crate::graphics::sprites::SpriteMaps;
+use crate::input::kick::Kick;
 use crate::state::player::Player;
 use crate::state::Direction::{Left, Right};
-use crate::state::{remove_box, GameState, Obstacle, ACCELERATION, JUMP_SOUND, JUMP_VELOCITY, KICK_BOX_SOUND, KICK_SOUND, MAX_VELOCITY, WALK_SOUND_1, WALK_SOUND_2, WALK_SOUND_3, WALK_SOUND_4};
+use crate::state::{GameState, Obstacle, ACCELERATION, JUMP_SOUND, JUMP_VELOCITY, MAX_VELOCITY, WALK_SOUND_1, WALK_SOUND_2, WALK_SOUND_3, WALK_SOUND_4};
 use minifb::{Key, KeyRepeat};
 use rodio::Sink;
 use std::collections::HashMap;
@@ -160,33 +161,6 @@ impl InputLogic for Jump {
             game_state.player.last_key = Some(Key::Space);
 
             append_source_source(&game_state, sink, JUMP_SOUND, 1500);
-        }
-    }
-}
-
-pub struct Kick;
-
-impl InputLogic for Kick {
-    fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
-        game_state.player.is_kicking = true;
-        game_state.player.kick_frame = 0;
-        game_state.player.kick_frame_timer = 0;
-
-        let (collision, id) = check_collision(game_state.all_maps[game_state.current_map_index].obstacles, &game_state.sprites, &game_state.player, game_state.player.direction == Left);
-
-        // Check if the player is adjacent to an obstacle
-        if collision {
-            append_source_source(&game_state, sink, KICK_BOX_SOUND, 1000);
-
-            if game_state.all_maps[game_state.current_map_index].obstacles[id.unwrap()].durability > 0 {
-                game_state.all_maps[game_state.current_map_index].obstacles[id.unwrap()].durability -= 1;
-            } else {
-
-                remove_box(game_state, id.unwrap(), sink);
-            }
-
-        } else {
-            append_source_source(&game_state, sink, KICK_SOUND, 1000);
         }
     }
 }

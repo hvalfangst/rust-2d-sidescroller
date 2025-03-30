@@ -10,32 +10,32 @@ use crate::audio::engine::append_source_source;
 
 pub mod event_loop;
 pub mod player;
-pub(crate) mod core_logic;
+pub mod core_logic;
 
 const FRAME_DURATION: Duration = Duration::from_nanos(16666667); // 16.6666667 ms = 60 FPS
 const BACKGROUND_CHANGE_INTERVAL: Duration = Duration::from_secs(1);
 
 const GRAVITY: f32 = 0.5;
-pub(crate) const JUMP_VELOCITY: f32 = -5.0;
-pub(crate) const MAX_VELOCITY: f32 = 2.0;
-pub(crate) const ACCELERATION: f32 = 0.1;
+pub const JUMP_VELOCITY: f32 = -5.0;
+pub const MAX_VELOCITY: f32 = 2.0;
+pub const ACCELERATION: f32 = 0.1;
 const FRICTION: f32 = 0.2;
 pub const GROUND: f32 = 205.0;
 const LOWER_BOUND: f32 = 0.0;
 const UPPER_BOUND: f32 = 225.0;
 pub const KICK_FRAME_DURATION: u32 = 8;
 
-pub(crate) const WALK_SOUND_1: usize = 0;
-pub(crate) const WALK_SOUND_2: usize = 1;
-pub(crate) const WALK_SOUND_3: usize = 2;
-pub(crate) const WALK_SOUND_4: usize = 3;
-pub(crate) const JUMP_SOUND: usize = 4;
+pub const WALK_SOUND_1: usize = 0;
+pub const WALK_SOUND_2: usize = 1;
+pub const WALK_SOUND_3: usize = 2;
+pub const WALK_SOUND_4: usize = 3;
+pub const JUMP_SOUND: usize = 4;
 const FALL_MILD_SOUND: usize = 5;
 const FALL_HEAVY_SOUND: usize = 6;
 const DOWN_SOUND: usize = 7;
 const EXPLOSION_SOUND: usize = 8;
-pub(crate) const KICK_SOUND: usize = 9;
-pub(crate) const KICK_BOX_SOUND: usize = 10;
+pub const KICK_SOUND: usize = 9;
+pub const KICK_BOX_SOUND: usize = 10;
 
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -172,43 +172,7 @@ impl Viewport {
     }
 }
 
-pub fn remove_box(game_state: &mut GameState, box_index: usize, sink: &mut rodio::Sink) {
-    println!("Removing box {}", box_index);
-    let mut to_remove = false;
-    if game_state.all_maps[game_state.current_map_index].obstacles[box_index].active {
-        println!("Box is active");
-        // Obtain the x_left and x_right values of the removed box
-        let removed_box_x_left = game_state.all_maps[game_state.current_map_index].obstacles[box_index].x_left;
-        let removed_box_x_right = game_state.all_maps[game_state.current_map_index].obstacles[box_index].x_right;
-        let removed_box_y_top = game_state.all_maps[game_state.current_map_index].obstacles[box_index].y_top;
 
-        println!("Box x_left: {}, x_right: {}", removed_box_x_left, removed_box_x_right);
-        println!("Box {} removed", box_index);
-
-        append_source_source(&game_state, sink, KICK_BOX_SOUND, 1000);
-
-        // Shift all boxes above the removed box down by 16 pixels
-        for i in 0..game_state.all_maps[game_state.current_map_index].obstacles.len() {
-            println!("Box id: {}", i);
-
-            let obstacle = &mut game_state.all_maps[game_state.current_map_index].obstacles[i];
-            println!("Box {} x_left: {}, x_right: {}", i, obstacle.x_left, obstacle.x_right);
-            if obstacle.x_left >= removed_box_x_left && obstacle.x_right <= removed_box_x_right { //&& obstacle.y_top < removed_box_y_top {
-                obstacle.falling = true;
-                obstacle.velocity_y = 0.0;
-                println!("Box {} is falling", i);
-                // Remove the box
-                to_remove = true;
-            } else {
-                println!("Box {} is not falling. obs.x_left: {} removed.x_left: {} obs.x_right {} removed.x_right {}", i, obstacle.x_left, removed_box_x_left, obstacle.x_right, removed_box_x_right);
-            }
-        }
-    }
-    if to_remove {
-        game_state.all_maps[game_state.current_map_index].obstacles.remove(box_index);
-        println!("Box {} removed", box_index);
-    }
-}
 
 
 pub struct Map<'a> {

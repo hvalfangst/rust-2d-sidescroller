@@ -297,7 +297,7 @@ fn extract_obstacles(grid: &Vec<Tile>, sort_by_y: bool) -> Vec<Obstacle> {
     }
 
     obstacles
-   }
+}
 
 #[derive(Debug)]
 pub enum TileType {
