@@ -81,6 +81,29 @@ pub struct Map<'a> {
     pub transition_y: f32  // Transition y coordinate for the player
 }
 
+pub struct Camera {
+    x: f32,
+    y: f32,
+    width: usize,
+    height: usize
+}
+
+impl Camera {
+    pub(crate) fn new(width: usize, height: usize) -> Self {
+        Self {
+            x: 0.0,
+            y: 0.0,
+            width,
+            height,
+        }
+    }
+
+    fn center_on(&mut self, player_x: f32, player_y: f32) {
+        self.x = player_x - (self.width as f32 / 2.0);
+        self.y = player_y - (self.height as f32 / 2.0);
+    }
+}
+
 pub struct GameState<'a> {
     pub player: Player, // Player object
     pub sprites: SpriteMaps, // Sprite maps
@@ -96,5 +119,7 @@ pub struct GameState<'a> {
     pub current_map_index: usize, // Current map index
     pub footstep_index: usize, // Footstep index
     pub footstep_active: bool, // Footstep active
-    pub sounds: Vec<Vec<u8>>  // Sounds
+    pub sounds: Vec<Vec<u8>>,  // Sounds
+    pub mountain_index: usize, // Mountain index
+    pub camera: Camera
 }

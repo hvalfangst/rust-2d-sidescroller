@@ -19,9 +19,12 @@ pub struct SpriteMaps {
     pub shadow: Vec<SpriteFrame>,
     pub game_over: Vec<SpriteFrame>,
     pub grass: Vec<SpriteFrame>,
-    pub sky: Vec<SpriteFrame>,
-    pub blue_background: Vec<SpriteFrame>,
-    pub metal_box: Vec<SpriteFrame>
+    pub metal_box: Vec<SpriteFrame>,
+    pub layer_0: Vec<SpriteFrame>,
+    pub layer_1: Vec<SpriteFrame>,
+    pub layer_2: Vec<SpriteFrame>,
+    pub layer_3: Vec<SpriteFrame>,
+    pub blue_background: Vec<SpriteFrame>
 }
 
 impl SpriteMaps {
@@ -33,9 +36,12 @@ impl SpriteMaps {
             kick: load_sprites_from_map("assets/sprites/kick.png", 27, 33),
             jump: load_sprites_from_map("assets/sprites/jump.png", 24, 34),
             grass: load_sprites_from_map("assets/sprites/grass.png", 256, 17),
-            sky: load_sprites_from_map("assets/sprites/sky_2.png", 256, 207),
-            blue_background: load_sprites_from_map("assets/sprites/blue_background.png", 256, 224),
             metal_box: load_sprites_from_map("assets/sprites/box.png", 16, 16),
+            layer_0: load_sprites_from_map("assets/sprites/layer_0.png", 256, 224),
+            layer_1: load_sprites_from_map("assets/sprites/layer_1.png", 256, 224),
+            layer_2: load_sprites_from_map("assets/sprites/layer_2.png", 256, 224),
+            layer_3: load_sprites_from_map("assets/sprites/layer_3.png", 256, 224),
+            blue_background: load_sprites_from_map("assets/sprites/blue_background.png", 256, 224)
         }
     }
 }

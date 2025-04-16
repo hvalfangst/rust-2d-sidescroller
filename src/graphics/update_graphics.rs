@@ -7,6 +7,8 @@ pub fn update_pixel_buffer(game_state: &mut GameState) {
     draw_player(game_state)
 }
 
+
+
 fn draw_player(game_state: &mut GameState) {
 
     // Determine the current direction and action of the player
@@ -51,10 +53,12 @@ fn draw_player(game_state: &mut GameState) {
     };
 
 
+    let fixed_x = (100.0) as usize; // Fixed x-coordinate for the player
+
     // Draw the chosen player sprite
     draw_sprite(
-        game_state.player.x as usize,
-        game_state.player.y as usize - (sprite_to_draw.height - 3) as usize,
+        fixed_x,
+        game_state.player.y as usize - (sprite_to_draw.height - 10) as usize,
         sprite_to_draw,
         game_state.window_buffer,
         game_state.all_maps[game_state.current_map_index].width
@@ -70,43 +74,61 @@ fn draw_player(game_state: &mut GameState) {
     };
 
     // Draw associated shadow if not on or above obstacle
-    if !game_state.player.on_obstacle && !game_state.player.above_obstacle {
-        draw_sprite(
-            game_state.player.x as usize,
-            GROUND as usize + 3,
-            shadow_sprite,
-            game_state.window_buffer,
-            game_state.all_maps[game_state.current_map_index].width
-        );
+    // if !game_state.player.on_obstacle && !game_state.player.above_obstacle {
+    //     draw_sprite(
+    //         game_state.player.x as usize,
+    //         GROUND as usize + 3,
+    //         shadow_sprite,
+    //         game_state.window_buffer,
+    //         game_state.all_maps[game_state.current_map_index].width
+    //     );
 
-    }
+    // }
 }
 
 fn draw_game_world(game_state: &mut GameState) {
+    let texture_width = game_state.all_maps[game_state.current_map_index].width;
 
-    // First draw the blue background
-    draw_sprite(0, 0, &game_state.sprites.blue_background[0], game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
+    draw_sprite(0, 0, &game_state.sprites.layer_0[0], game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
 
-    // Then draw the grass, which alternates between two sprites to emulate wind
-    draw_sprite(0, game_state.all_maps[game_state.current_map_index].height - game_state.sprites.grass[0].height as usize, &game_state.sprites.grass[game_state.grass_sprite_index], game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
 
-    // Then draw the sky, which alternates between four sprites to emulate clouds
-    draw_sprite(0, 0, &game_state.sprites.sky[game_state.sky_sprite_index], game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
+    for (i, divisor) in [16, 6, 4, 1].iter().enumerate() {
+        let offset_x = game_state.player.x as usize / divisor % texture_width;
+        let offset_y = game_state.player.y as usize / 666;
 
-    // Draw the obstacles, which in this case are metal boxes that have 3 different sprites based on durability
-    game_state.all_maps[game_state.current_map_index].obstacles.iter().enumerate().for_each(|(index, obstacle)| {
-        if obstacle.active {
-            let metal_box_sprite =
-            if obstacle.durability == 2 {
-                &game_state.sprites.metal_box[0] // undamaged
-            } else if obstacle.durability == 1 {
-                &game_state.sprites.metal_box[1] // slightly damaged
-            } else {
-                &game_state.sprites.metal_box[2] // damaged
-            };
+        let layer = match i {
+            0 => &game_state.sprites.layer_0[0],
+            1 => &game_state.sprites.layer_1[0],
+            2 => &game_state.sprites.layer_2[0],
+            3 => &game_state.sprites.layer_3[0],
+            _ => unreachable!(),
+        };
 
-            draw_sprite(obstacle.x_left as usize, obstacle.y_bottom as usize, metal_box_sprite, game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
-        }
-    });
+
+        draw_sprite(
+            (game_state.window_width).saturating_sub(offset_x),
+            offset_y,
+            layer,
+            game_state.window_buffer,
+            game_state.all_maps[game_state.current_map_index].width,
+        );
+    }
+
+
+    // // Draw the obstacles, which in this case are metal boxes that have 3 different sprites based on durability
+    // game_state.all_maps[game_state.current_map_index].obstacles.iter().enumerate().for_each(|(index, obstacle)| {
+    //     if obstacle.active {
+    //         let metal_box_sprite =
+    //         if obstacle.durability == 2 {
+    //             &game_state.sprites.metal_box[0] // undamaged
+    //         } else if obstacle.durability == 1 {
+    //             &game_state.sprites.metal_box[1] // slightly damaged
+    //         } else {
+    //             &game_state.sprites.metal_box[2] // damaged
+    //         };
+    //
+    //         draw_sprite(obstacle.x_left as usize, obstacle.y_bottom as usize, metal_box_sprite, game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
+    //     }
+    // });
 
 }

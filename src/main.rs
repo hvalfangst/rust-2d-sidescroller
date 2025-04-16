@@ -7,7 +7,7 @@ use winit::event_loop::EventLoop;
 use winit::monitor::MonitorHandle;
 
 use crate::state::player::Player;
-use crate::state::{GameState, Map, Obstacle, ObstacleId};
+use crate::state::{Camera, GameState, Map, Obstacle, ObstacleId};
 use crate::{
     graphics::sprites::SpriteMaps,
     state::core_logic::initialize_core_logic_map,
@@ -16,6 +16,7 @@ use crate::{
 use rodio::{OutputStream, Sink};
 use input::handler::initialize_input_logic_map;
 use crate::graphics::{SCALED_WINDOW_HEIGHT, SCALED_WINDOW_WIDTH};
+
 
 mod state;
 mod graphics;
@@ -28,20 +29,19 @@ fn main() {
     let mut sink = Sink::try_new(&stream_handle).unwrap();
 
     let sprites = SpriteMaps::new();
-    let mut player = Player::new(1.0, 176.0);
+    let mut player = Player::new(100.0, 176.0);
     let input_logic = initialize_input_logic_map();
     let core_logic = initialize_core_logic_map();
 
     let (mut map_one_tiles, map_one_width, map_one_height) = read_grid_from_file("assets/maps/map_one.txt").expect("Failed to read grid from file");
     let (mut map_two_tiles, _map_two_width, _map_two_height) = read_grid_from_file("assets/maps/map_two.txt").expect("Failed to read grid from file");
     let (mut map_three_tiles, map_two_width, map_two_height) = read_grid_from_file("assets/maps/map_three.txt").expect("Failed to read grid from file");
-    let mut map_one_obstacles = extract_obstacles(&map_one_tiles, false);
-    let mut map_two_obstacles = extract_obstacles(&map_two_tiles, false);
-    let mut map_three_obstacles = extract_obstacles(&map_three_tiles, false);
 
-    print_obstacles(&mut map_one_obstacles, "1");
-    print_obstacles(&mut map_two_obstacles, "2");
-    print_obstacles(&mut map_three_obstacles, "3");
+    let mut map_one_obstacles = Vec::new(); //extract_obstacles(&map_one_tiles);
+    let mut map_two_obstacles = Vec::new(); //extract_obstacles(&map_two_tiles);
+    let mut map_three_obstacles = Vec::new();  //extract_obstacles(&map_three_tiles);
+
+
 
     let fullscreen = false;
 
@@ -108,6 +108,8 @@ fn main() {
 
     let sounds: Vec<Vec<u8>> = load_sounds();
 
+
+
     let game_state = GameState {
         player,
         sprites,
@@ -123,7 +125,9 @@ fn main() {
         current_map_index: 0,
         footstep_index: 0,
         footstep_active: false,
-        sounds
+        sounds,
+        mountain_index: 0,
+        camera: Camera::new(window_width, window_height),
     };
 
     start_event_loop(game_state, input_logic, core_logic, &mut sink);
@@ -224,7 +228,7 @@ fn read_grid_from_file(filename: &str) -> io::Result<(Vec<Tile>, usize, usize)> 
     Ok((grid, width, height))
 }
 
-fn extract_obstacles(grid: &Vec<Tile>, sort_by_y: bool) -> Vec<Obstacle> {
+fn extract_obstacles(grid: &Vec<Tile>) -> Vec<Obstacle> {
     let mut obstacles = Vec::new();
 
     for tile in grid {

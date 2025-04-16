@@ -25,6 +25,8 @@ pub struct VerticalBounds;
 
 impl CoreLogic for VerticalBounds {
     fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
+        println!("Player X: {}, Y: {}", game_state.player.x, game_state.player.y);
+
         // Prevent the player from moving out vertical (y) bounds
         if game_state.player.y <= 40.0 {
             game_state.player.on_ground = false;
@@ -42,9 +44,9 @@ impl CoreLogic for HorizontalBounds {
             game_state.player.x = LOWER_BOUND;
             game_state.player.vx = 0.0;
         } else if game_state.player.x >= UPPER_BOUND {
-            game_state.player.x = 0.0;
-            game_state.player.vx = 0.0;
-            game_state.current_map_index += 1
+            // game_state.player.x = 0.0;
+            // game_state.player.vx = 0.0;
+            // game_state.current_map_index += 1
         }
     }
 }
