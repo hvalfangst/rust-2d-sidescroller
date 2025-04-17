@@ -25,7 +25,7 @@ pub struct VerticalBounds;
 
 impl CoreLogic for VerticalBounds {
     fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
-        println!("Player X: {}, Y: {}", game_state.player.x, game_state.player.y);
+        // println!("Player X: {}, Y: {}", game_state.player.x, game_state.player.y);
 
         // Prevent the player from moving out vertical (y) bounds
         if game_state.player.y <= 40.0 {

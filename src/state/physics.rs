@@ -33,12 +33,13 @@ pub fn jump_obstacles(mut game_state: &mut GameState, sink: &mut rodio::Sink) {
                 // println!("game_state.player.y: {}, obstacle.y_bottom: {}, obstacle.y_top: {}", game_state.player.y, obstacle.y_bottom, obstacle.y_top);
                 if game_state.player.state != PlayerState::OnObstacle {
                     // player just landed on the obstacle
-                    game_state.player.y = obstacle.y_bottom - 1.0;
+                    game_state.player.y = obstacle.y_bottom - 10.0;
                     game_state.player.on_obstacle = true;
                     game_state.player.on_ground = false;
                     game_state.player.is_jumping = false;
                     game_state.player.state = PlayerState::OnObstacle;
                     game_state.player.vy = 0.0;
+                    println!("Player is on an obstacle");
                 } else {
                     // game_state.player is already on the obstacle
                     game_state.player.on_obstacle = true;
@@ -74,7 +75,7 @@ pub fn jump_obstacles(mut game_state: &mut GameState, sink: &mut rodio::Sink) {
 
             game_state.player.state = PlayerState::OnGround;
 
-
+            println!("Player is on the ground");
         } else {
             // player is in the air (not above any obstacle)
             game_state.player.on_ground = false;
@@ -82,6 +83,7 @@ pub fn jump_obstacles(mut game_state: &mut GameState, sink: &mut rodio::Sink) {
             game_state.player.above_obstacle = false;
             game_state.player.state = PlayerState::InAir;
             game_state.player.is_jumping = true;
+            println!("Player is in the air");
         }
     }
 }
@@ -112,12 +114,12 @@ pub fn decrease_velocity(game_state: &mut GameState) {
 
 pub fn check_collision(obstacles: &Vec<Obstacle>, sprites: &SpriteMaps, player: &Player, is_left: bool) -> (bool, Option<usize>) {
     let mut collision_id: Option<usize> = None;
-    println!("----------------------------------------------------------------------");
+    // println!("----------------------------------------------------------------------");
     let collision = obstacles.iter().enumerate().any(|(index, obstacle)| {
-        println!("Checking collision: id: {:?}, x_left: {}, x_right: {}, y_bottom: {}, y_top: {}", obstacle.id, obstacle.x_left, obstacle.x_right, obstacle.y_bottom, obstacle.y_top);
+        // println!("Checking collision: id: {:?}, x_left: {}, x_right: {}, y_bottom: {}, y_top: {}", obstacle.id, obstacle.x_left, obstacle.x_right, obstacle.y_bottom, obstacle.y_top);
 
         if obstacle.active == false {
-            println!("- - - - Obstacle is not active - - - -");
+            // println!("- - - - Obstacle is not active - - - -");
             return false;
         }
 
@@ -128,11 +130,13 @@ pub fn check_collision(obstacles: &Vec<Obstacle>, sprites: &SpriteMaps, player: 
         };
 
         if player_x > obstacle.x_left && player_x < obstacle.x_right {
-            println!("Collision of x axis detected: player_x: {}, obstacle.x_left: {}, obstacle.x_right: {}", player_x, obstacle.x_left, obstacle.x_right);
+            // println!("Player y: {}, obs.y_bottom: {}, obs.y_top: {}", player.y, obstacle.y_bottom, obstacle.y_top);
 
-            if player.y >= obstacle.y_top + 25.0 && player.y <= obstacle.y_bottom + 25.0 {
+            if player.y >= obstacle.y_top + 10.0 && player.y <= obstacle.y_bottom + 25.0 {
+                println!("Collision of x detected: p_x: {}, obs.x_left: {}, obs.x_right: {}", player_x, obstacle.x_left, obstacle.x_right);
+
                 collision_id = Some(index);
-                println!("Collision detected with obstacle id {:?} x.left {}, x.right: {}, obstacle.y_bottom: {}, obstacle.y_top: {}", obstacle.id, obstacle.x_left, obstacle.x_right , obstacle.y_bottom + 25.0, obstacle.y_top + 25.0);
+                // println!("Collision detected with obstacle id {:?} x.left {}, x.right: {}, obstacle.y_bottom: {}, obstacle.y_top: {}", obstacle.id, obstacle.x_left, obstacle.x_right , obstacle.y_bottom + 25.0, obstacle.y_top + 25.0);
                 true
             } else {
                 false

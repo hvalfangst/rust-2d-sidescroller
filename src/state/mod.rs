@@ -123,3 +123,33 @@ pub struct GameState<'a> {
     pub mountain_index: usize, // Mountain index
     pub camera: Camera
 }
+
+fn spawn_obstacle(x: f32, obstacles: &mut Vec<Obstacle>) {
+    let x_left = x;
+    let x_right = x + 16.0;
+    let y_bottom = 200.0; // Example fixed y-coordinate for obstacles
+    let y_top = y_bottom - 16.0;
+
+    // Add a new obstacle
+    obstacles.push(Obstacle {
+        id: ObstacleId(obstacles.len()),
+        x_left,
+        x_right,
+        y_bottom,
+        y_top,
+        active: true,
+        durability: 2,
+        falling: false,
+        velocity_y: 0.0,
+        left_obstacle: None,
+        right_obstacle: None,
+        over_obstacle: None,
+        under_obstacle: None,
+        is_bottom_obstacle: false,
+        is_top_obstacle: true,
+        is_leftmost_obstacle: false,
+        is_rightmost_obstacle: false,
+    });
+
+    println!("Spawned obstacle at x: {}", x);
+}

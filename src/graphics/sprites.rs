@@ -24,7 +24,8 @@ pub struct SpriteMaps {
     pub layer_1: Vec<SpriteFrame>,
     pub layer_2: Vec<SpriteFrame>,
     pub layer_3: Vec<SpriteFrame>,
-    pub blue_background: Vec<SpriteFrame>
+    pub blue_background: Vec<SpriteFrame>,
+    pub ground: Vec<SpriteFrame>
 }
 
 impl SpriteMaps {
@@ -41,7 +42,8 @@ impl SpriteMaps {
             layer_1: load_sprites_from_map("assets/sprites/layer_1.png", 256, 224),
             layer_2: load_sprites_from_map("assets/sprites/layer_2.png", 256, 224),
             layer_3: load_sprites_from_map("assets/sprites/layer_3.png", 256, 224),
-            blue_background: load_sprites_from_map("assets/sprites/blue_background.png", 256, 224)
+            blue_background: load_sprites_from_map("assets/sprites/blue_background.png", 256, 224),
+            ground: load_sprites_from_map("assets/sprites/ground.png", 256, 9)
         }
     }
 }

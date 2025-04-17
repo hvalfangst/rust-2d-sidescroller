@@ -53,7 +53,8 @@ fn draw_player(game_state: &mut GameState) {
     };
 
 
-    let fixed_x = (100.0) as usize; // Fixed x-coordinate for the player
+    // Calculate the fixed x position for the player sprite, which is to be centered in the window
+    let fixed_x = (game_state.window_width / 8) - (sprite_to_draw.width as usize / 2);
 
     // Draw the chosen player sprite
     draw_sprite(
@@ -74,25 +75,28 @@ fn draw_player(game_state: &mut GameState) {
     };
 
     // Draw associated shadow if not on or above obstacle
-    // if !game_state.player.on_obstacle && !game_state.player.above_obstacle {
-    //     draw_sprite(
-    //         game_state.player.x as usize,
-    //         GROUND as usize + 3,
-    //         shadow_sprite,
-    //         game_state.window_buffer,
-    //         game_state.all_maps[game_state.current_map_index].width
-    //     );
+    if !game_state.player.on_obstacle && !game_state.player.above_obstacle {
+        draw_sprite(
+            fixed_x,
+            GROUND as usize + 7,
+            shadow_sprite,
+            game_state.window_buffer,
+            game_state.all_maps[game_state.current_map_index].width
+        );
 
-    // }
+    }
 }
 
 fn draw_game_world(game_state: &mut GameState) {
     let texture_width = game_state.all_maps[game_state.current_map_index].width;
 
+    // Always draw the static background layer first in order to fill all pixels as the parallax effect can result in empty pixels
     draw_sprite(0, 0, &game_state.sprites.layer_0[0], game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
 
-
+    // Loop through the layers and draw them based on the player's position in relation to the divisor to achieve parallax scrolling
     for (i, divisor) in [16, 6, 4, 1].iter().enumerate() {
+
+        // Layer 0 will have offset divided by 16, layer 1 by 6, layer 2 by 4, and layer 3 by 1
         let offset_x = game_state.player.x as usize / divisor % texture_width;
         let offset_y = game_state.player.y as usize / 666;
 
@@ -104,7 +108,6 @@ fn draw_game_world(game_state: &mut GameState) {
             _ => unreachable!(),
         };
 
-
         draw_sprite(
             (game_state.window_width).saturating_sub(offset_x),
             offset_y,
@@ -114,21 +117,25 @@ fn draw_game_world(game_state: &mut GameState) {
         );
     }
 
+    // Calculate the horizontal offset for the obstacles based on the player's position at a fixed distance
+    let obstacle_x_offset = (game_state.window_width / 2)
+        .saturating_sub(game_state.player.x as usize + game_state.sprites.player[0].width as usize / 2)
+        .saturating_sub(160);
 
-    // // Draw the obstacles, which in this case are metal boxes that have 3 different sprites based on durability
-    // game_state.all_maps[game_state.current_map_index].obstacles.iter().enumerate().for_each(|(index, obstacle)| {
-    //     if obstacle.active {
-    //         let metal_box_sprite =
-    //         if obstacle.durability == 2 {
-    //             &game_state.sprites.metal_box[0] // undamaged
-    //         } else if obstacle.durability == 1 {
-    //             &game_state.sprites.metal_box[1] // slightly damaged
-    //         } else {
-    //             &game_state.sprites.metal_box[2] // damaged
-    //         };
-    //
-    //         draw_sprite(obstacle.x_left as usize, obstacle.y_bottom as usize, metal_box_sprite, game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
-    //     }
-    // });
+    // Draw the obstacles, which in this case are metal boxes that have 3 different sprites based on durability
+    game_state.all_maps[game_state.current_map_index].obstacles.iter().enumerate().for_each(|(index, obstacle)| {
+        if obstacle.active && (obstacle.x_left - game_state.player.x).abs() < 110.0 {
+            let metal_box_sprite =
+                if obstacle.durability == 2 {
+                    &game_state.sprites.metal_box[0] // undamaged
+                } else if obstacle.durability == 1 {
+                    &game_state.sprites.metal_box[1] // slightly damaged
+                } else {
+                    &game_state.sprites.metal_box[2] // damaged
+                };
+
+            draw_sprite(obstacle_x_offset, obstacle.y_bottom as usize, metal_box_sprite, game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
+        }
+    });
 
 }

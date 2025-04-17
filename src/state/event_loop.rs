@@ -7,7 +7,7 @@ use std::time::Instant;
 use minifb::Key;
 
 use crate::graphics::render_graphics::render_pixel_buffer;
-use crate::state::{BACKGROUND_CHANGE_INTERVAL, GameState};
+use crate::state::{BACKGROUND_CHANGE_INTERVAL, GameState, spawn_obstacle};
 use crate::state::core_logic::{execute_core_logic, CoreLogic};
 use crate::state::FRAME_DURATION;
 use crate::graphics::update_graphics::update_pixel_buffer;
@@ -17,13 +17,21 @@ pub fn start_event_loop(mut game_state: GameState, input_logic_map: InputLogicMa
 
     // Variables for background sprite changing
     let mut last_grass_sprite_index_change = Instant::now();
-    let mut last_sky_sprite_index_change = Instant::now();
     let mut last_footstep_time = Instant::now();
     let mut movement_key_press_count = 0;
+    let mut spawned = false; // Flag to check if obstacles have been spawned
 
     // Main event loop: runs as long as the window is open and the Escape key is not pressed
     while game_state.window.is_open() && !game_state.window.is_key_down(Key::Escape) {
         let start = Instant::now();
+
+
+        // Inside the game loop
+        if !spawned {
+            spawn_obstacle(200.0, &mut game_state.all_maps[game_state.current_map_index].obstacles);
+
+            spawned = true;
+        }
 
         if last_footstep_time.elapsed() >= std::time::Duration::from_millis(500) {
             game_state.footstep_active = true;
@@ -56,12 +64,6 @@ pub fn start_event_loop(mut game_state: GameState, input_logic_map: InputLogicMa
             game_state.grass_sprite_index = (game_state.grass_sprite_index + 1) % 2; // Cycle between 0 and 1
             last_grass_sprite_index_change = Instant::now(); // Reset the timer to current time
         }
-
-        // // Change sky sprite every 2 seconds - alternate between 0 and 3
-        // if last_sky_sprite_index_change.elapsed() >= BACKGROUND_CHANGE_INTERVAL * 2 {
-        //     game_state.sky_sprite_index = (game_state.sky_sprite_index + 1) % 4; // Cycle between 0 and 3
-        //     last_sky_sprite_index_change = Instant::now(); // Reset the timer to current time
-        // }
 
         // Update the pixel buffer with the current game state
         update_pixel_buffer(&mut game_state);
