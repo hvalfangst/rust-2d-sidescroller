@@ -128,6 +128,9 @@ fn main() {
         sounds,
         mountain_index: 0,
         camera: Camera::new(window_width, window_height),
+        previous_offset_x: 0,
+        heart_sprite_index: 0,
+        layer_4_sprite_index: 0,
     };
 
     start_event_loop(game_state, input_logic, core_logic, &mut sink);

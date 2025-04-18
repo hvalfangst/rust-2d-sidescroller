@@ -121,13 +121,16 @@ pub struct GameState<'a> {
     pub footstep_active: bool, // Footstep active
     pub sounds: Vec<Vec<u8>>,  // Sounds
     pub mountain_index: usize, // Mountain index
-    pub camera: Camera
+    pub camera: Camera,
+    pub previous_offset_x: usize,
+    pub heart_sprite_index: usize,
+    pub layer_4_sprite_index: usize
 }
 
 fn spawn_obstacle(x: f32, obstacles: &mut Vec<Obstacle>) {
     let x_left = x;
     let x_right = x + 16.0;
-    let y_bottom = 200.0; // Example fixed y-coordinate for obstacles
+    let y_bottom = 200.0;
     let y_top = y_bottom - 16.0;
 
     // Add a new obstacle

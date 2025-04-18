@@ -39,7 +39,7 @@ pub fn jump_obstacles(mut game_state: &mut GameState, sink: &mut rodio::Sink) {
                     game_state.player.is_jumping = false;
                     game_state.player.state = PlayerState::OnObstacle;
                     game_state.player.vy = 0.0;
-                    println!("Player is on an obstacle");
+                    // println!("Player is on an obstacle");
                 } else {
                     // game_state.player is already on the obstacle
                     game_state.player.on_obstacle = true;
@@ -75,7 +75,7 @@ pub fn jump_obstacles(mut game_state: &mut GameState, sink: &mut rodio::Sink) {
 
             game_state.player.state = PlayerState::OnGround;
 
-            println!("Player is on the ground");
+            // println!("Player is on the ground");
         } else {
             // player is in the air (not above any obstacle)
             game_state.player.on_ground = false;
@@ -83,7 +83,7 @@ pub fn jump_obstacles(mut game_state: &mut GameState, sink: &mut rodio::Sink) {
             game_state.player.above_obstacle = false;
             game_state.player.state = PlayerState::InAir;
             game_state.player.is_jumping = true;
-            println!("Player is in the air");
+            // println!("Player is in the air");
         }
     }
 }
@@ -133,7 +133,7 @@ pub fn check_collision(obstacles: &Vec<Obstacle>, sprites: &SpriteMaps, player: 
             // println!("Player y: {}, obs.y_bottom: {}, obs.y_top: {}", player.y, obstacle.y_bottom, obstacle.y_top);
 
             if player.y >= obstacle.y_top + 10.0 && player.y <= obstacle.y_bottom + 25.0 {
-                println!("Collision of x detected: p_x: {}, obs.x_left: {}, obs.x_right: {}", player_x, obstacle.x_left, obstacle.x_right);
+                // println!("Collision of x detected: p_x: {}, obs.x_left: {}, obs.x_right: {}", player_x, obstacle.x_left, obstacle.x_right);
 
                 collision_id = Some(index);
                 // println!("Collision detected with obstacle id {:?} x.left {}, x.right: {}, obstacle.y_bottom: {}, obstacle.y_top: {}", obstacle.id, obstacle.x_left, obstacle.x_right , obstacle.y_bottom + 25.0, obstacle.y_top + 25.0);

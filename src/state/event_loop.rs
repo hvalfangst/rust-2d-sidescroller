@@ -15,21 +15,31 @@ use crate::input::handler::{handle_user_input, InputLogicMap};
 
 pub fn start_event_loop(mut game_state: GameState, input_logic_map: InputLogicMap, core_logic_map: HashMap<String, Rc<RefCell<dyn CoreLogic>>>, sink: &mut rodio::Sink) {
 
-    // Variables for background sprite changing
     let mut last_grass_sprite_index_change = Instant::now();
     let mut last_footstep_time = Instant::now();
+    let mut last_heart_sprite_index_change = Instant::now();
+    let mut last_layer_4_sprite_index_change: Instant = Instant::now();
     let mut movement_key_press_count = 0;
-    let mut spawned = false; // Flag to check if obstacles have been spawned
+    let mut spawned = false;
 
     // Main event loop: runs as long as the window is open and the Escape key is not pressed
     while game_state.window.is_open() && !game_state.window.is_key_down(Key::Escape) {
         let start = Instant::now();
 
+        // Alternate the heart sprite every 500 milliseconds
+        if last_heart_sprite_index_change.elapsed() >= std::time::Duration::from_millis(500) {
+            game_state.heart_sprite_index = (game_state.heart_sprite_index + 1) % 2; // Cycle between 0 and 1
+            last_heart_sprite_index_change = Instant::now(); // Reset the timer to current time
+        }
 
-        // Inside the game loop
+        // Alternate between lighthouse sprites every 250 milliseconds
+        if last_layer_4_sprite_index_change.elapsed() >= std::time::Duration::from_millis(900) {
+            game_state.layer_4_sprite_index = (game_state.layer_4_sprite_index + 1) % 4; // Cycle between 0 and 3
+            last_layer_4_sprite_index_change = Instant::now(); // Reset the timer to current time
+        }
+
         if !spawned {
             spawn_obstacle(200.0, &mut game_state.all_maps[game_state.current_map_index].obstacles);
-
             spawned = true;
         }
 

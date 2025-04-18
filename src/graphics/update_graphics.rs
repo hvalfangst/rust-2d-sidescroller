@@ -94,17 +94,29 @@ fn draw_game_world(game_state: &mut GameState) {
     draw_sprite(0, 0, &game_state.sprites.layer_0[0], game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
 
     // Loop through the layers and draw them based on the player's position in relation to the divisor to achieve parallax scrolling
-    for (i, divisor) in [16, 6, 4, 1].iter().enumerate() {
+    for (i, divisor) in [16, 6, 6, 4, 1].iter().enumerate() {
 
-        // Layer 0 will have offset divided by 16, layer 1 by 6, layer 2 by 4, and layer 3 by 1
+        // // Layer 0 will have offset divided by 16, layer 1 by 6, layer 2 by 4, and layer 3 by 1
         let offset_x = game_state.player.x as usize / divisor % texture_width;
+
+        // let target_offset_x = if game_state.player.direction == Right {
+        //     game_state.player.x as usize / divisor
+        // } else {
+        //     (game_state.player.x as usize / divisor).saturating_sub(30) % texture_width
+        // };
+        //
+        // // Gradually adjust the offset_x towards the target_offset_x
+        // let offset_x = (game_state.previous_offset_x as f32 * 0.8 + target_offset_x as f32 * 0.125) as usize % texture_width;
+        // game_state.previous_offset_x = offset_x;
+
         let offset_y = game_state.player.y as usize / 666;
 
         let layer = match i {
             0 => &game_state.sprites.layer_0[0],
             1 => &game_state.sprites.layer_1[0],
-            2 => &game_state.sprites.layer_2[0],
-            3 => &game_state.sprites.layer_3[0],
+            2 => &game_state.sprites.layer_4[game_state.layer_4_sprite_index],
+            3 => &game_state.sprites.layer_2[0],
+            4 => &game_state.sprites.layer_3[0],
             _ => unreachable!(),
         };
 
@@ -137,5 +149,13 @@ fn draw_game_world(game_state: &mut GameState) {
             draw_sprite(obstacle_x_offset, obstacle.y_bottom as usize, metal_box_sprite, game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
         }
     });
+
+    let heart_sprite_width = game_state.sprites.heart[game_state.heart_sprite_index].width as usize;
+    // Draw the three hearts in the top left corner of the screen
+    draw_sprite(0, 0, &game_state.sprites.heart[game_state.heart_sprite_index], game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
+    draw_sprite(heart_sprite_width + 1, 0, &game_state.sprites.heart[game_state.heart_sprite_index], game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
+    draw_sprite((heart_sprite_width * 2) + 2, 0, &game_state.sprites.heart[game_state.heart_sprite_index], game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
+
+
 
 }
