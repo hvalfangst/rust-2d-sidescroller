@@ -3,7 +3,7 @@ use crate::audio::engine::append_source_source;
 use crate::input::handler::{InputLogic};
 use crate::state::Direction::Left;
 use crate::state::{GameState, KICK_BOX_SOUND, KICK_SOUND};
-use crate::state::physics::check_collision;
+use crate::state::collision::check_collision;
 
 pub struct Kick;
 

@@ -7,16 +7,19 @@ use minifb::{Key, KeyRepeat};
 use rodio::Sink;
 use std::collections::HashMap;
 use std::sync::Arc;
-use crate::state::physics::decrease_velocity;
+use crate::state::core_logic::decrease_velocity;
 
 pub fn handle_user_input(game_state: &mut GameState, commands: &InputLogicMap, sink: &mut Sink) {
+
     let legal_keys = [Key::Space, Key::D, Key::A, Key::X];
     let mut any_key_pressed = false;
 
     for key in legal_keys.iter() {
         if game_state.window.is_key_pressed(*key, KeyRepeat::Yes) {
             any_key_pressed = true;
-            delegate_command(*key, &commands, game_state, sink);
+            if !game_state.player.invincible {
+                delegate_command(*key, &commands, game_state, sink);
+            }
         }
     }
 

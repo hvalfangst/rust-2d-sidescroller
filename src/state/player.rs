@@ -46,6 +46,7 @@ pub enum PlayerState {
         pub game_over: bool,
         pub obstacle_detected: bool,
         pub health: u8,
+        pub invincible: bool
     }
 
 impl Player {
@@ -78,7 +79,8 @@ impl Player {
             spike_active: false,
             game_over: false,
             obstacle_detected: false,
-            health: 3
+            health: 3,
+            invincible: false
         }
     }
 }

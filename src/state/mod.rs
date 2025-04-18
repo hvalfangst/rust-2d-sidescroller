@@ -9,9 +9,8 @@ use rodio::Source;
 pub mod event_loop;
 pub mod player;
 pub mod core_logic;
-pub mod physics;
 mod gravity;
-mod collision;
+pub(crate) mod collision;
 
 const FRAME_DURATION: Duration = Duration::from_nanos(16666667); // 16.6666667 ms = 60 FPS
 const BACKGROUND_CHANGE_INTERVAL: Duration = Duration::from_secs(1);
@@ -141,6 +140,8 @@ pub struct GameState<'a> {
     pub layer_4_sprite_index: usize,
     pub toxic_trap_sprite_index: usize,
     pub layer_0_index: usize,
+    pub damage_taken: bool,
+    pub designated_x: f32
 }
 
 fn spawn_obstacle(x: f32, obstacles: &mut Vec<Obstacle>, traps: &mut Vec<Trap>) {
