@@ -77,7 +77,8 @@ fn main() {
         starting_x: 0.0,
         starting_y: 0.0,
         transition_x: 200.0,
-        transition_y: 0.0
+        transition_y: 0.0,
+        traps: &mut Vec::new()
     };
 
     let map_two = Map {
@@ -89,7 +90,8 @@ fn main() {
         starting_x: 0.0,
         starting_y: 0.0,
         transition_x: 200.0,
-        transition_y: 0.0
+        transition_y: 0.0,
+        traps: &mut Vec::new()
     };
 
     let map_three = Map {
@@ -101,7 +103,8 @@ fn main() {
         starting_x: 0.0,
         starting_y: 0.0,
         transition_x: 200.0,
-        transition_y: 0.0
+        transition_y: 0.0,
+        traps: &mut Vec::new()
     };
 
     let all_maps = vec![map_one, map_two, map_three];
@@ -131,6 +134,7 @@ fn main() {
         previous_offset_x: 0,
         heart_sprite_index: 0,
         layer_4_sprite_index: 0,
+        toxic_trap_sprite_index: 0
     };
 
     start_event_loop(game_state, input_logic, core_logic, &mut sink);

@@ -28,6 +28,7 @@ pub struct SpriteMaps {
     pub blue_background: Vec<SpriteFrame>,
     pub ground: Vec<SpriteFrame>,
     pub heart: Vec<SpriteFrame>,
+    pub toxic_trap: Vec<SpriteFrame>
 }
 
 impl SpriteMaps {
@@ -47,7 +48,8 @@ impl SpriteMaps {
             layer_4: load_sprites_from_map("assets/sprites/layer_4.png", 256, 224),
             blue_background: load_sprites_from_map("assets/sprites/blue_background.png", 256, 224),
             ground: load_sprites_from_map("assets/sprites/ground.png", 256, 9),
-            heart: load_sprites_from_map("assets/sprites/heart.png", 14, 12)
+            heart: load_sprites_from_map("assets/sprites/heart.png", 14, 12),
+            toxic_trap: load_sprites_from_map("assets/sprites/toxic_trap.png", 16, 16),
         }
     }
 }

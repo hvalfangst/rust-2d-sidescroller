@@ -152,6 +152,34 @@ pub fn check_collision(obstacles: &Vec<Obstacle>, sprites: &SpriteMaps, player: 
     (collision, collision_id)
 }
 
+pub struct CheckTrapCollision;
+
+impl CoreLogic for CheckTrapCollision {
+    fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
+        let traps = &game_state.all_maps[game_state.current_map_index].traps;
+        let player = &game_state.player;
+
+        for trap in traps.iter() {
+            if trap.active == false {
+                continue;
+            }
+            if player.x + 10.0 > trap.x_left && player.x + 5.0 < trap.x_right {
+                if player.y <= trap.y_bottom && player.y >= trap.y_top {
+                    game_state.player.health -= 1;
+                    game_state.player.x = trap.x_left - 64.0;
+                    game_state.player.vy = 2.0;
+
+                    if game_state.player.health == 0 {
+                        game_state.player.game_over = true;
+                    }
+
+                    break;
+                }
+            }
+        }
+    }
+}
+
 pub struct ModifyPosition;
 
 impl CoreLogic for ModifyPosition {

@@ -69,6 +69,19 @@ pub struct Obstacle {
     pub under_obstacle: Option<ObstacleId> // Id of the obstacle below
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct TrapId(pub usize);
+
+#[derive(Clone, Copy)]
+pub struct Trap {
+    pub id: TrapId,
+    pub x_left: f32, // left x coordinate of the box (lower x value)
+    pub x_right: f32, // right x coordinate of the box (higher x value)
+    pub y_top: f32, // top y coordinate of the box (lower y value)
+    pub y_bottom: f32, // bottom y coordinate of the box (higher y value)
+    pub active: bool // If false, box is removed
+}
+
 pub struct Map<'a> {
     pub id: usize, // Unique identifier for the map
     pub tiles: Vec<Tile>, // Tiles for the map
@@ -78,7 +91,8 @@ pub struct Map<'a> {
     pub starting_x: f32, // Starting x coordinate for the player
     pub starting_y: f32, // Starting y coordinate for the player
     pub transition_x: f32, // Transition x coordinate for the player
-    pub transition_y: f32  // Transition y coordinate for the player
+    pub transition_y: f32,  // Transition y coordinate for the player
+    pub traps: &'a mut Vec<Trap>, // Traps for the map
 }
 
 pub struct Camera {
@@ -124,10 +138,11 @@ pub struct GameState<'a> {
     pub camera: Camera,
     pub previous_offset_x: usize,
     pub heart_sprite_index: usize,
-    pub layer_4_sprite_index: usize
+    pub layer_4_sprite_index: usize,
+    pub toxic_trap_sprite_index: usize
 }
 
-fn spawn_obstacle(x: f32, obstacles: &mut Vec<Obstacle>) {
+fn spawn_obstacle(x: f32, obstacles: &mut Vec<Obstacle>, traps: &mut Vec<Trap>) {
     let x_left = x;
     let x_right = x + 16.0;
     let y_bottom = 200.0;
@@ -154,5 +169,18 @@ fn spawn_obstacle(x: f32, obstacles: &mut Vec<Obstacle>) {
         is_rightmost_obstacle: false,
     });
 
-    println!("Spawned obstacle at x: {}", x);
+    let trap_x_left = x_left + 16.0;
+    let trap_x_right = trap_x_left + 16.0;
+
+    // Add a new trap
+    traps.push(Trap {
+        id: TrapId(traps.len()),
+        x_left: trap_x_left,
+        x_right: trap_x_right,
+        y_bottom,
+        y_top,
+        active: true
+    });
+
+    println!("Spawned obstacle and associated trap at x: {}", x);
 }

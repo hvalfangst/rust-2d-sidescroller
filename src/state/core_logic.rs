@@ -2,7 +2,7 @@ use crate::graphics::render_graphics::render_pixel_buffer;
 use crate::graphics::update_graphics::update_pixel_buffer;
 use crate::state::collision::CollisionDetection;
 use crate::state::gravity::{ApplyGravity, JumpingObstacles};
-use crate::state::physics::ModifyPosition;
+use crate::state::physics::{CheckTrapCollision, ModifyPosition};
 use crate::state::player::Player;
 use crate::state::{GameState, GROUND, LOWER_BOUND, UPPER_BOUND};
 use rodio::Sink;
@@ -62,7 +62,7 @@ impl CoreLogic for CheckGameOver {
                 update_pixel_buffer(game_state);
                 render_pixel_buffer(game_state);
                 game_state.game_over_index += 1;
-                sleep(std::time::Duration::from_millis(200));
+                sleep(std::time::Duration::from_millis(900));
             }
 
             game_state.game_over_index = 0;
@@ -81,6 +81,7 @@ pub fn initialize_core_logic_map() -> HashMap<String, Rc<RefCell<dyn CoreLogic>>
     logic_map.insert("HorizontalBounds".to_string(), Rc::new(RefCell::new(HorizontalBounds)));
     logic_map.insert("CheckGameOver".to_string(), Rc::new(RefCell::new(CheckGameOver)));
     logic_map.insert("ModifyPosition".to_string(), Rc::new(RefCell::new(ModifyPosition)));
+    logic_map.insert("CheckTrapCollision".to_string(), Rc::new(RefCell::new(CheckTrapCollision)));
 
     logic_map
 }

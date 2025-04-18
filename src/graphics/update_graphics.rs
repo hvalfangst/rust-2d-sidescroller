@@ -88,6 +88,19 @@ fn draw_player(game_state: &mut GameState) {
 }
 
 fn draw_game_world(game_state: &mut GameState) {
+
+    // Draw the game over sprite, which cycle through 4 frames
+    if game_state.player.game_over {
+        game_state.game_over_index = (game_state.game_over_index + 1) % 4;
+        draw_sprite(0,0,
+            &game_state.sprites.game_over[game_state.game_over_index],
+            game_state.window_buffer,
+            game_state.all_maps[game_state.current_map_index].width
+        );
+        return;
+    }
+
+
     let texture_width = game_state.all_maps[game_state.current_map_index].width;
 
     // Always draw the static background layer first in order to fill all pixels as the parallax effect can result in empty pixels
@@ -98,17 +111,6 @@ fn draw_game_world(game_state: &mut GameState) {
 
         // // Layer 0 will have offset divided by 16, layer 1 by 6, layer 2 by 4, and layer 3 by 1
         let offset_x = game_state.player.x as usize / divisor % texture_width;
-
-        // let target_offset_x = if game_state.player.direction == Right {
-        //     game_state.player.x as usize / divisor
-        // } else {
-        //     (game_state.player.x as usize / divisor).saturating_sub(30) % texture_width
-        // };
-        //
-        // // Gradually adjust the offset_x towards the target_offset_x
-        // let offset_x = (game_state.previous_offset_x as f32 * 0.8 + target_offset_x as f32 * 0.125) as usize % texture_width;
-        // game_state.previous_offset_x = offset_x;
-
         let offset_y = game_state.player.y as usize / 666;
 
         let layer = match i {
@@ -134,6 +136,8 @@ fn draw_game_world(game_state: &mut GameState) {
         .saturating_sub(game_state.player.x as usize + game_state.sprites.player[0].width as usize / 2)
         .saturating_sub(160);
 
+    let toxic_trap_sprite = &game_state.sprites.toxic_trap[game_state.toxic_trap_sprite_index];
+
     // Draw the obstacles, which in this case are metal boxes that have 3 different sprites based on durability
     game_state.all_maps[game_state.current_map_index].obstacles.iter().enumerate().for_each(|(index, obstacle)| {
         if obstacle.active && (obstacle.x_left - game_state.player.x).abs() < 110.0 {
@@ -146,16 +150,37 @@ fn draw_game_world(game_state: &mut GameState) {
                     &game_state.sprites.metal_box[2] // damaged
                 };
 
+            // Draw obstacle
             draw_sprite(obstacle_x_offset, obstacle.y_bottom as usize, metal_box_sprite, game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
+
+            // Draw temporary toxic trap right next to the obstacle
+            draw_sprite(obstacle_x_offset + 16.0 as usize, obstacle.y_bottom as usize, toxic_trap_sprite, game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
+
         }
     });
 
     let heart_sprite_width = game_state.sprites.heart[game_state.heart_sprite_index].width as usize;
-    // Draw the three hearts in the top left corner of the screen
-    draw_sprite(0, 0, &game_state.sprites.heart[game_state.heart_sprite_index], game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
-    draw_sprite(heart_sprite_width + 1, 0, &game_state.sprites.heart[game_state.heart_sprite_index], game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
-    draw_sprite((heart_sprite_width * 2) + 2, 0, &game_state.sprites.heart[game_state.heart_sprite_index], game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
 
+    // Assign a triple of indices based on the player's health as there are 3 independent hearts
+    let health_triple = match game_state.player.health {
+        3 => [0, 0, 0],
+        2 => [0, 0, 2],
+        1 => [0, 2, 2],
+        0 => [2, 2, 2],
+        _ => [2, 2, 2],
+    };
 
+    for (i, &triple) in health_triple.iter().enumerate() {
+        // Only alternate between the heart_sprite index if the triple value is less than 2
+        let heart_index = if triple < 2 { game_state.heart_sprite_index } else { triple };
 
+        // Draw the hearts in the top left corner of the screen
+        draw_sprite(
+            i * (heart_sprite_width + 1),
+            0,
+            &game_state.sprites.heart[heart_index],
+            game_state.window_buffer,
+            game_state.all_maps[game_state.current_map_index].width,
+        );
+    }
 }

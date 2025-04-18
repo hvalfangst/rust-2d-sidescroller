@@ -19,6 +19,7 @@ pub fn start_event_loop(mut game_state: GameState, input_logic_map: InputLogicMa
     let mut last_footstep_time = Instant::now();
     let mut last_heart_sprite_index_change = Instant::now();
     let mut last_layer_4_sprite_index_change: Instant = Instant::now();
+    let mut last_toxic_sprite_index_change: Instant = Instant::now();
     let mut movement_key_press_count = 0;
     let mut spawned = false;
 
@@ -26,20 +27,33 @@ pub fn start_event_loop(mut game_state: GameState, input_logic_map: InputLogicMa
     while game_state.window.is_open() && !game_state.window.is_key_down(Key::Escape) {
         let start = Instant::now();
 
-        // Alternate the heart sprite every 500 milliseconds
+        // Alternate between the two hearth sprite frames 500 milliseconds
         if last_heart_sprite_index_change.elapsed() >= std::time::Duration::from_millis(500) {
             game_state.heart_sprite_index = (game_state.heart_sprite_index + 1) % 2; // Cycle between 0 and 1
             last_heart_sprite_index_change = Instant::now(); // Reset the timer to current time
         }
 
-        // Alternate between lighthouse sprites every 250 milliseconds
+        // Gradually cycle through the four first toxic sprite frames every 200 milliseconds until one reaches 4,
+        // then switch to the last two frames (4 and 5) and repeat them forever with a higher frequency (100 ms)
+            if game_state.toxic_trap_sprite_index >= 4 {
+                if last_toxic_sprite_index_change.elapsed() >= std::time::Duration::from_millis(100) {
+                    game_state.toxic_trap_sprite_index = if game_state.toxic_trap_sprite_index == 4 { 5 } else { 4 };
+                    last_toxic_sprite_index_change = Instant::now(); // Reset the timer to current time
+                }
+            } else if last_toxic_sprite_index_change.elapsed() >= std::time::Duration::from_millis(200) {
+                game_state.toxic_trap_sprite_index = (game_state.toxic_trap_sprite_index + 1) % 6; // Cycle between 0 and 5
+                last_toxic_sprite_index_change = Instant::now(); // Reset the timer to current time
+            }
+
+        // Alternate between the 4 lighthouse sprite frames every 900 milliseconds
         if last_layer_4_sprite_index_change.elapsed() >= std::time::Duration::from_millis(900) {
             game_state.layer_4_sprite_index = (game_state.layer_4_sprite_index + 1) % 4; // Cycle between 0 and 3
             last_layer_4_sprite_index_change = Instant::now(); // Reset the timer to current time
         }
 
         if !spawned {
-            spawn_obstacle(200.0, &mut game_state.all_maps[game_state.current_map_index].obstacles);
+            let current_map = &mut game_state.all_maps[game_state.current_map_index];
+            spawn_obstacle(200.0, &mut current_map.obstacles, &mut current_map.traps);
             spawned = true;
         }
 
