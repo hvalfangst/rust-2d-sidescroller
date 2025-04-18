@@ -66,7 +66,14 @@ impl CoreLogic for CheckGameOver {
                 );
                 render_pixel_buffer(game_state);
                 game_state.game_over_index += 1;
-                sleep(std::time::Duration::from_millis(100));
+
+                let amount_to_sleep = if game_state.game_over_index >= 6 {
+                    500
+                } else {
+                    100
+                };
+
+                sleep(std::time::Duration::from_millis(amount_to_sleep));
             }
 
             // Reset game state
