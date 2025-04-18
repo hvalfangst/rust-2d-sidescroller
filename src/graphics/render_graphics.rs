@@ -1,4 +1,4 @@
-
+use std::thread::sleep;
 use crate::state::GameState;
 
 pub fn render_pixel_buffer(game_state: &mut GameState) {

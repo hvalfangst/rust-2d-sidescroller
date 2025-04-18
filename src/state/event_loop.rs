@@ -20,7 +20,6 @@ pub fn start_event_loop(mut game_state: GameState, input_logic_map: InputLogicMa
     let mut last_heart_sprite_index_change = Instant::now();
     let mut last_layer_4_sprite_index_change: Instant = Instant::now();
     let mut last_toxic_sprite_index_change: Instant = Instant::now();
-    let mut movement_key_press_count = 0;
     let mut spawned = false;
 
     // Main event loop: runs as long as the window is open and the Escape key is not pressed
@@ -64,21 +63,6 @@ pub fn start_event_loop(mut game_state: GameState, input_logic_map: InputLogicMa
 
         // Handle basic user input, which influence the player's state such as velocity, direction, etc.
         handle_user_input(&mut game_state, &input_logic_map, sink);
-
-        if game_state.window.is_key_down(Key::D) || game_state.window.is_key_down(Key::A) {
-            movement_key_press_count += 1;
-            if movement_key_press_count >= 20 {
-                if game_state.window.is_key_down(Key::D) {
-                    game_state.mountain_index = (game_state.mountain_index + 1) % 4; // Increment up to 3
-                } else if game_state.window.is_key_down(Key::A) {
-                    if game_state.mountain_index > 0 {
-                        game_state.mountain_index -= 1; // Decrement down to 0
-                    }
-                }
-
-                movement_key_press_count = 0;
-            }
-        }
 
         // Process game logic such as obstacle detection, physics, sounds etc.
         execute_core_logic(&mut game_state, &core_logic_map, sink);

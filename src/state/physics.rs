@@ -169,6 +169,8 @@ impl CoreLogic for CheckTrapCollision {
                     game_state.player.x = trap.x_left - 64.0;
                     game_state.player.vy = 2.0;
 
+                    game_state.layer_0_index = 1;
+
                     if game_state.player.health == 0 {
                         game_state.player.game_over = true;
                     }

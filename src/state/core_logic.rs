@@ -57,7 +57,6 @@ pub struct CheckGameOver;
 impl CoreLogic for CheckGameOver {
     fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
         if game_state.player.game_over {
-            println!("Game Over!");
 
             for _ in 0..9 {
                 draw_sprite(0,0,
@@ -73,6 +72,7 @@ impl CoreLogic for CheckGameOver {
             // Reset game state
             game_state.game_over_index = 0;
             game_state.player = Player::new(0.0, GROUND); // Reset player state
+            game_state.layer_0_index = 0;
         }
     }
 }

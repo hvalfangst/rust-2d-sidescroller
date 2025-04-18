@@ -101,7 +101,7 @@ fn draw_game_world(game_state: &mut GameState) {
         let offset_y = game_state.player.y as usize / 666;
 
         let layer = match i {
-            0 => &game_state.sprites.layer_0[0],
+            0 => &game_state.sprites.layer_0[game_state.layer_0_index],
             1 => &game_state.sprites.layer_1[0],
             2 => &game_state.sprites.layer_4[game_state.layer_4_sprite_index],
             3 => &game_state.sprites.layer_2[0],

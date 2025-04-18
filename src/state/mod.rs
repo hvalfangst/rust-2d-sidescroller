@@ -139,7 +139,8 @@ pub struct GameState<'a> {
     pub previous_offset_x: usize,
     pub heart_sprite_index: usize,
     pub layer_4_sprite_index: usize,
-    pub toxic_trap_sprite_index: usize
+    pub toxic_trap_sprite_index: usize,
+    pub layer_0_index: usize,
 }
 
 fn spawn_obstacle(x: f32, obstacles: &mut Vec<Obstacle>, traps: &mut Vec<Trap>) {
