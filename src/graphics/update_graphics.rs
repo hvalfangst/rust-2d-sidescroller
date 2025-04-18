@@ -91,7 +91,7 @@ fn draw_game_world(game_state: &mut GameState) {
     let texture_width = game_state.all_maps[game_state.current_map_index].width;
 
     // Always draw the static background layer first in order to fill all pixels as the parallax effect can result in empty pixels
-    draw_sprite(0, 0, &game_state.sprites.layer_0[0], game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
+    draw_sprite(0, 0, &game_state.sprites.layer_0[game_state.layer_0_index], game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
 
     // Loop through the layers and draw them based on the player's position in relation to the divisor to achieve parallax scrolling
     for (i, divisor) in [16, 6, 6, 4, 1].iter().enumerate() {
@@ -142,7 +142,6 @@ fn draw_game_world(game_state: &mut GameState) {
 
             // Draw temporary toxic trap right next to the obstacle
             draw_sprite(obstacle_x_offset + 16.0 as usize, obstacle.y_bottom as usize, toxic_trap_sprite, game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
-
         }
     });
 
