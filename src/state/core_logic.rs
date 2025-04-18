@@ -10,6 +10,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::thread::sleep;
+use crate::graphics::sprites::draw_sprite;
 
 pub fn execute_core_logic(game_state: &mut GameState, core_logic_operations: &HashMap<String, Rc<RefCell<dyn CoreLogic>>>, sink: &mut Sink) {
     for (_, core_logic_operation) in core_logic_operations.iter() {
@@ -58,13 +59,18 @@ impl CoreLogic for CheckGameOver {
         if game_state.player.game_over {
             println!("Game Over!");
 
-            for _ in 0..4 {
-                update_pixel_buffer(game_state);
+            for _ in 0..9 {
+                draw_sprite(0,0,
+                            &game_state.sprites.game_over[game_state.game_over_index],
+                            game_state.window_buffer,
+                            game_state.all_maps[game_state.current_map_index].width
+                );
                 render_pixel_buffer(game_state);
                 game_state.game_over_index += 1;
-                sleep(std::time::Duration::from_millis(900));
+                sleep(std::time::Duration::from_millis(100));
             }
 
+            // Reset game state
             game_state.game_over_index = 0;
             game_state.player = Player::new(0.0, GROUND); // Reset player state
         }

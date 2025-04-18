@@ -88,19 +88,6 @@ fn draw_player(game_state: &mut GameState) {
 }
 
 fn draw_game_world(game_state: &mut GameState) {
-
-    // Draw the game over sprite, which cycle through 4 frames
-    if game_state.player.game_over {
-        game_state.game_over_index = (game_state.game_over_index + 1) % 4;
-        draw_sprite(0,0,
-            &game_state.sprites.game_over[game_state.game_over_index],
-            game_state.window_buffer,
-            game_state.all_maps[game_state.current_map_index].width
-        );
-        return;
-    }
-
-
     let texture_width = game_state.all_maps[game_state.current_map_index].width;
 
     // Always draw the static background layer first in order to fill all pixels as the parallax effect can result in empty pixels
