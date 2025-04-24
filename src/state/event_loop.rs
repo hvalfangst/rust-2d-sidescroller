@@ -7,7 +7,7 @@ use std::time::Instant;
 use minifb::Key;
 
 use crate::graphics::render_graphics::render_pixel_buffer;
-use crate::state::{BACKGROUND_CHANGE_INTERVAL, GameState, spawn_obstacle};
+use crate::state::{BACKGROUND_CHANGE_INTERVAL, GameState, spawn_obstacle, GROUND, spawn_stacked_obstacles, spawn_trap};
 use crate::state::core_logic::{execute_core_logic, CoreLogic};
 use crate::state::FRAME_DURATION;
 use crate::graphics::update_graphics::update_pixel_buffer;
@@ -52,7 +52,12 @@ pub fn start_event_loop(mut game_state: GameState, input_logic_map: InputLogicMa
 
         if !spawned {
             let current_map = &mut game_state.all_maps[game_state.current_map_index];
-            spawn_obstacle(200.0, &mut current_map.obstacles, &mut current_map.traps);
+            spawn_obstacle(200.0, 200.0, &mut current_map.obstacles);
+
+            spawn_obstacle(300.0, 200.0, &mut current_map.obstacles);
+            // spawn_trap(184.0, 200.0, &mut current_map.traps);
+            // spawn_obstacle(400.0, 200.0, &mut current_map.obstacles);
+            // spawn_stacked_obstacles(400.0, GROUND, 5,  &mut current_map.obstacles, &mut current_map.traps);
             spawned = true;
         }
 

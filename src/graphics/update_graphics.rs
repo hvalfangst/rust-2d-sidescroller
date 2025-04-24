@@ -55,6 +55,7 @@ fn draw_player(game_state: &mut GameState) {
 
     // Calculate the fixed x position for the player sprite, which is to be centered in the window
     let fixed_x = (game_state.window_width / 8) - (sprite_to_draw.width as usize / 2);
+    // println!("Fixed x: {}", fixed_x);
 
     // Draw the chosen player sprite
     draw_sprite(
@@ -118,32 +119,56 @@ fn draw_game_world(game_state: &mut GameState) {
         );
     }
 
-    // Calculate the horizontal offset for the obstacles based on the player's position at a fixed distance
-    let obstacle_x_offset = (game_state.window_width / 2)
-        .saturating_sub(game_state.player.x as usize + game_state.sprites.player[0].width as usize / 2)
-        .saturating_sub(160);
+    let fixed_player_x = 109;
 
-    let toxic_trap_sprite = &game_state.sprites.toxic_trap[game_state.toxic_trap_sprite_index];
-
-    // Draw the obstacles, which in this case are metal boxes that have 3 different sprites based on durability
+    // Draw the obstacles, which have a metal box sprite of 3 different frames based on durability
     game_state.all_maps[game_state.current_map_index].obstacles.iter().enumerate().for_each(|(index, obstacle)| {
-        if obstacle.active && (obstacle.x_left - game_state.player.x).abs() < 110.0 {
-            let metal_box_sprite =
-                if obstacle.durability == 2 {
-                    &game_state.sprites.metal_box[0] // undamaged
-                } else if obstacle.durability == 1 {
-                    &game_state.sprites.metal_box[1] // slightly damaged
-                } else {
-                    &game_state.sprites.metal_box[2] // damaged
-                };
 
-            // Draw obstacle
-            draw_sprite(obstacle_x_offset, obstacle.y_bottom as usize, metal_box_sprite, game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
+        // TODO: Check if the obstacle is active and within a certain distance from the player
+        if obstacle.active  {
 
-            // Draw temporary toxic trap right next to the obstacle
-            draw_sprite(obstacle_x_offset + 16.0 as usize, obstacle.y_bottom as usize, toxic_trap_sprite, game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
+
+            let final_x = (obstacle.x_left as isize - game_state.player.x as isize + fixed_player_x as isize) as usize;
+            println!("player.x: {}, fixed player.x: {}, obstacle x.left: {}, final x : {}", game_state.player.x, fixed_player_x, obstacle.x_left,  final_x);
+
+            if final_x < game_state.window_width / 2 && final_x > 0 {
+                // println!("Obstacle x offset: {} versus {}", obstacle_x_offset, game_state.window_width / 4);
+                // TODO: Must set obstacles to inactive at some point
+                // && (obstacle.x_left - game_state.player.x).abs() < 110.0
+
+                let metal_box_sprite =
+                    if obstacle.durability == 2 {
+                        &game_state.sprites.metal_box[0] // undamaged
+                    } else if obstacle.durability == 1 {
+                        &game_state.sprites.metal_box[1] // slightly damaged
+                    } else {
+                        &game_state.sprites.metal_box[2] // damaged
+                    };
+
+
+                draw_sprite(final_x, obstacle.y_bottom as usize, metal_box_sprite, game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
+            }
         }
     });
+
+    // Draw the traps
+    game_state.all_maps[game_state.current_map_index].traps.iter().enumerate().for_each(|(index, trap)| {
+        if trap.active  {
+
+            let final_x = (trap.x_left as isize - game_state.player.x as isize + fixed_player_x as isize) as usize;
+
+            if final_x < game_state.window_width / 2 && final_x > 0 {
+                let toxic_trap_sprite = &game_state.sprites.toxic_trap[game_state.toxic_trap_sprite_index];
+                // Draw trap
+                draw_sprite(final_x, trap.y_bottom as usize, toxic_trap_sprite, game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
+            }
+        }
+    });
+
+
+
+    // Draw temporary toxic trap right next to the obstacle
+    // draw_sprite(obstacle_x_offset + 16.0 as usize, obstacle.y_bottom as usize, toxic_trap_sprite, game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
 
     let heart_sprite_width = game_state.sprites.heart[game_state.heart_sprite_index].width as usize;
 

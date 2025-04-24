@@ -7,7 +7,7 @@ use winit::event_loop::EventLoop;
 use winit::monitor::MonitorHandle;
 
 use crate::state::player::Player;
-use crate::state::{Camera, GameState, Map, Obstacle, ObstacleId};
+use crate::state::{GameState, Map, Obstacle, ObstacleId};
 use crate::{
     graphics::sprites::SpriteMaps,
     state::core_logic::initialize_core_logic_map,
@@ -63,6 +63,7 @@ fn main() {
     ).unwrap_or_else(|e| {
         panic!("{}", e);
     });
+
 
     // Initialize window and scaled buffer
     let mut window_buffer = vec![0; map_one_width * map_one_height];
@@ -130,7 +131,6 @@ fn main() {
         footstep_active: false,
         sounds,
         mountain_index: 0,
-        camera: Camera::new(window_width, window_height),
         previous_offset_x: 0,
         heart_sprite_index: 0,
         layer_4_sprite_index: 0,

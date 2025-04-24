@@ -6,6 +6,7 @@ use crate::Tile;
 use minifb::Window;
 use rodio::Source;
 
+
 pub mod event_loop;
 pub mod player;
 pub mod core_logic;
@@ -94,28 +95,7 @@ pub struct Map<'a> {
     pub traps: &'a mut Vec<Trap>, // Traps for the map
 }
 
-pub struct Camera {
-    x: f32,
-    y: f32,
-    width: usize,
-    height: usize
-}
 
-impl Camera {
-    pub(crate) fn new(width: usize, height: usize) -> Self {
-        Self {
-            x: 0.0,
-            y: 0.0,
-            width,
-            height,
-        }
-    }
-
-    fn center_on(&mut self, player_x: f32, player_y: f32) {
-        self.x = player_x - (self.width as f32 / 2.0);
-        self.y = player_y - (self.height as f32 / 2.0);
-    }
-}
 
 pub struct GameState<'a> {
     pub player: Player, // Player object
@@ -133,8 +113,7 @@ pub struct GameState<'a> {
     pub footstep_index: usize, // Footstep index
     pub footstep_active: bool, // Footstep active
     pub sounds: Vec<Vec<u8>>,  // Sounds
-    pub mountain_index: usize, // Mountain index
-    pub camera: Camera,
+    pub mountain_index: usize, // Mountain inde
     pub previous_offset_x: usize,
     pub heart_sprite_index: usize,
     pub layer_4_sprite_index: usize,
@@ -144,10 +123,10 @@ pub struct GameState<'a> {
     pub designated_x: f32
 }
 
-fn spawn_obstacle(x: f32, obstacles: &mut Vec<Obstacle>, traps: &mut Vec<Trap>) {
+fn spawn_obstacle(x: f32, y: f32, obstacles: &mut Vec<Obstacle>) {
     let x_left = x;
     let x_right = x + 16.0;
-    let y_bottom = 200.0;
+    let y_bottom = y;
     let y_top = y_bottom - 16.0;
 
     // Add a new obstacle
@@ -171,18 +150,77 @@ fn spawn_obstacle(x: f32, obstacles: &mut Vec<Obstacle>, traps: &mut Vec<Trap>) 
         is_rightmost_obstacle: false,
     });
 
-    let trap_x_left = x_left + 16.0;
-    let trap_x_right = trap_x_left + 16.0;
+    println!("Spawned obstacle at x: {}, y: {}", x, y_bottom);
+}
+
+fn spawn_trap(x: f32, y: f32, traps: &mut Vec<Trap>) {
+    let x_left = x;
+    let x_right = x + 16.0;
+    let y_bottom = y;
+    let y_top = y_bottom - 16.0;
 
     // Add a new trap
     traps.push(Trap {
         id: TrapId(traps.len()),
-        x_left: trap_x_left,
-        x_right: trap_x_right,
+        x_left,
+        x_right,
         y_bottom,
         y_top,
         active: true
     });
 
-    println!("Spawned obstacle and associated trap at x: {}", x);
+    println!("Spawned trap at x: {}, y: {}", x, y);
+}
+
+fn spawn_stacked_obstacles(
+    x: f32,
+    y_start: f32,
+    count: usize,
+    obstacles: &mut Vec<Obstacle>,
+    traps: &mut Vec<Trap>,
+) {
+    let mut y_bottom = y_start;
+    let mut y_top = y_bottom - 16.0;
+
+    for i in 0..count {
+        // Add a new obstacle
+        obstacles.push(Obstacle {
+            id: ObstacleId(obstacles.len()),
+            x_left: x,
+            x_right: x + 16.0,
+            y_bottom,
+            y_top,
+            active: true,
+            durability: 2,
+            falling: false,
+            velocity_y: 0.0,
+            left_obstacle: None,
+            right_obstacle: None,
+            over_obstacle: if i > 0 { Some(ObstacleId(obstacles.len() - 1)) } else { None },
+            under_obstacle: None,
+            is_bottom_obstacle: i == 0,
+            is_top_obstacle: i == count - 1,
+            is_leftmost_obstacle: false,
+            is_rightmost_obstacle: false,
+        });
+
+        // Update y-coordinates for the next obstacle
+        y_bottom = y_top;
+        y_top -= 16.0;
+    }
+
+    // Add a trap at the base of the stack
+    traps.push(Trap {
+        id: TrapId(traps.len()),
+        x_left: x + 16.0,
+        x_right: x + 32.0,
+        y_bottom: y_start,
+        y_top: y_start - 16.0,
+        active: true,
+    });
+
+    println!(
+        "Spawned {} stacked obstacles and a trap at x: {}, starting y: {}",
+        count, x, y_start
+    );
 }
