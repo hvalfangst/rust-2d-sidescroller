@@ -124,17 +124,15 @@ fn draw_game_world(game_state: &mut GameState) {
     // Draw the obstacles, which have a metal box sprite of 3 different frames based on durability
     game_state.all_maps[game_state.current_map_index].obstacles.iter().enumerate().for_each(|(index, obstacle)| {
 
-        // TODO: Check if the obstacle is active and within a certain distance from the player
         if obstacle.active  {
 
+            let final_x = (obstacle.x_left as isize - game_state.player.x as isize + fixed_player_x as isize)
+                .max(0) as usize;
+            println!("player.x: {}, fixed player.x: {}, window_width/4 {} obstacle x.left: {}, final x : {}", game_state.player.x, fixed_player_x,  game_state.window_width/4,
+                     obstacle.x_left,  final_x);
 
-            let final_x = (obstacle.x_left as isize - game_state.player.x as isize + fixed_player_x as isize) as usize;
-            println!("player.x: {}, fixed player.x: {}, obstacle x.left: {}, final x : {}", game_state.player.x, fixed_player_x, obstacle.x_left,  final_x);
-
-            if final_x < game_state.window_width / 2 && final_x > 0 {
-                // println!("Obstacle x offset: {} versus {}", obstacle_x_offset, game_state.window_width / 4);
-                // TODO: Must set obstacles to inactive at some point
-                // && (obstacle.x_left - game_state.player.x).abs() < 110.0
+            // Only draw obstacles that are within the window width
+            if final_x < game_state.window_width / 4 && final_x > 0 {
 
                 let metal_box_sprite =
                     if obstacle.durability == 2 {
