@@ -20,6 +20,7 @@ pub fn start_event_loop(mut game_state: GameState, input_logic_map: InputLogicMa
     let mut last_heart_sprite_index_change = Instant::now();
     let mut last_layer_4_sprite_index_change: Instant = Instant::now();
     let mut last_toxic_sprite_index_change: Instant = Instant::now();
+    let mut last_layer_3_sprite_index_change: Instant = Instant::now();
     let mut spawned = false;
 
     // Main event loop: runs as long as the window is open and the Escape key is not pressed
@@ -48,6 +49,12 @@ pub fn start_event_loop(mut game_state: GameState, input_logic_map: InputLogicMa
         if last_layer_4_sprite_index_change.elapsed() >= std::time::Duration::from_millis(900) {
             game_state.layer_4_sprite_index = (game_state.layer_4_sprite_index + 1) % 4; // Cycle between 0 and 3
             last_layer_4_sprite_index_change = Instant::now(); // Reset the timer to current time
+        }
+
+        // Alternate between the ground sprite frames every 200 milliseconds
+        if last_layer_3_sprite_index_change.elapsed() >= std::time::Duration::from_millis(200) {
+            game_state.layer_3_sprite_index = (game_state.layer_3_sprite_index + 1) % 2; // Cycle between 0 and 1
+            last_layer_3_sprite_index_change = Instant::now(); // Reset the timer to current time
         }
 
         if !spawned {

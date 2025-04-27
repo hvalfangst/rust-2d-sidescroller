@@ -106,7 +106,7 @@ fn draw_game_world(game_state: &mut GameState) {
             1 => &game_state.sprites.layer_1[0],
             2 => &game_state.sprites.layer_4[game_state.layer_4_sprite_index],
             3 => &game_state.sprites.layer_2[0],
-            4 => &game_state.sprites.layer_3[0],
+            4 => &game_state.sprites.layer_3[game_state.layer_3_sprite_index],
             _ => unreachable!(),
         };
 

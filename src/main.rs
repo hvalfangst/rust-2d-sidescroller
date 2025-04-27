@@ -134,6 +134,7 @@ fn main() {
         previous_offset_x: 0,
         heart_sprite_index: 0,
         layer_4_sprite_index: 0,
+        layer_3_sprite_index: 0,
         toxic_trap_sprite_index: 0,
         layer_0_index: 0,
         damage_taken: false,
