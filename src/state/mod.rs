@@ -123,7 +123,9 @@ pub struct GameState<'a> {
     pub last_heart_sprite_index_change: Instant,
     pub last_ground_sprite_frame_index_change: Instant,
     pub last_light_house_lights_sprite_index_change: Instant,
-    pub last_toxic_sprite_index_change: Instant
+    pub last_toxic_sprite_index_change: Instant,
+    pub obstacle_spawned: bool,
+    pub trap_spawned: bool,
 }
 
 fn spawn_obstacle(x: f32, y: f32, obstacles: &mut Vec<Obstacle>) {

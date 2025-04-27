@@ -142,7 +142,9 @@ fn main() {
         last_heart_sprite_index_change: std::time::Instant::now(),
         last_ground_sprite_frame_index_change: std::time::Instant::now(),
         last_light_house_lights_sprite_index_change: std::time::Instant::now(),
-        last_toxic_sprite_index_change: std::time::Instant::now()
+        last_toxic_sprite_index_change: std::time::Instant::now(),
+        obstacle_spawned: false,
+        trap_spawned: false,
     };
 
     start_event_loop(game_state, input_logic, core_logic, &mut sink);

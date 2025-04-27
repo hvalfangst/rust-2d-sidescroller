@@ -3,7 +3,7 @@ use crate::graphics::sprites::draw_sprite;
 use crate::state::collision::{CheckTrapCollision, CollisionDetection};
 use crate::state::gravity::{ApplyGravity, JumpingObstacles};
 use crate::state::player::Player;
-use crate::state::{Direction, GameState, ACCELERATION, GROUND, LOWER_BOUND, MAX_VELOCITY, UPPER_BOUND};
+use crate::state::{spawn_obstacle, spawn_trap, Direction, GameState, ACCELERATION, GROUND, LOWER_BOUND, MAX_VELOCITY, UPPER_BOUND};
 use rodio::Sink;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -185,6 +185,32 @@ impl CoreLogic for AlternateToxicTrapSpriteFrames {
     }
 }
 
+pub struct SpawnObstacles;
+
+impl CoreLogic for SpawnObstacles {
+    fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
+        if !game_state.obstacle_spawned {
+            spawn_obstacle(200.0, 200.0, game_state.all_maps[game_state.current_map_index].obstacles);
+            spawn_obstacle(350.0, 200.0, &mut game_state.all_maps[game_state.current_map_index].obstacles);
+            game_state.obstacle_spawned = true;
+        }
+
+
+    }
+}
+
+pub struct SpawnTraps;
+
+impl CoreLogic for SpawnTraps {
+    fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
+        if !game_state.trap_spawned {
+            spawn_trap(216.0, 200.0, game_state.all_maps[game_state.current_map_index].traps);
+            spawn_trap(366.0, 200.0, game_state.all_maps[game_state.current_map_index].traps);
+            game_state.trap_spawned = true;
+        }
+    }
+}
+
 pub fn initialize_core_logic_map() -> HashMap<String, Rc<RefCell<dyn CoreLogic>>> {
     let mut logic_map: HashMap<String, Rc<RefCell<dyn CoreLogic>>> = HashMap::new();
 
@@ -192,6 +218,9 @@ pub fn initialize_core_logic_map() -> HashMap<String, Rc<RefCell<dyn CoreLogic>>
     logic_map.insert("AlternateHeartSprites".to_string(), Rc::new(RefCell::new(AlternateHeartSpriteFrames)));
     logic_map.insert("AlternateLightHouseSprites".to_string(), Rc::new(RefCell::new(AlternateLightHouseSpriteFrames)));
     logic_map.insert("AlternateToxicTrapSprites".to_string(), Rc::new(RefCell::new(AlternateToxicTrapSpriteFrames)));
+
+    logic_map.insert("SpawnObstacles".to_string(), Rc::new(RefCell::new(SpawnObstacles)));
+    logic_map.insert("SpawnTraps".to_string(), Rc::new(RefCell::new(SpawnTraps)));
 
     logic_map.insert("JumpingObstacles".to_string(), Rc::new(RefCell::new(JumpingObstacles)));
     logic_map.insert("CollisionDetection".to_string(), Rc::new(RefCell::new(CollisionDetection)));
