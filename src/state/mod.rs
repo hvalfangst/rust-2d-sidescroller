@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use crate::graphics::sprites::SpriteMaps;
 use crate::state::player::Player;
@@ -114,12 +114,16 @@ pub struct GameState<'a> {
     pub mountain_index: usize, // Mountain inde
     pub previous_offset_x: usize,
     pub heart_sprite_index: usize,
-    pub layer_4_sprite_index: usize,
-    pub layer_3_sprite_index: usize,
+    pub lighthouse_lights_sprite_index: usize,
+    pub ground_sprite_frame_index: usize,
     pub toxic_trap_sprite_index: usize,
     pub layer_0_index: usize,
     pub damage_taken: bool,
-    pub designated_x: f32
+    pub designated_x: f32,
+    pub last_heart_sprite_index_change: Instant,
+    pub last_ground_sprite_frame_index_change: Instant,
+    pub last_light_house_lights_sprite_index_change: Instant,
+    pub last_toxic_sprite_index_change: Instant
 }
 
 fn spawn_obstacle(x: f32, y: f32, obstacles: &mut Vec<Obstacle>) {

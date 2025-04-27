@@ -132,8 +132,67 @@ impl CoreLogic for ModifyPosition {
     }
 }
 
+pub struct AlternateHeartSpriteFrames;
+
+impl CoreLogic for AlternateHeartSpriteFrames {
+    fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
+        // Alternate between the heart sprite frames every 200 milliseconds
+        if game_state.last_heart_sprite_index_change.elapsed() >= std::time::Duration::from_millis(500) {
+            game_state.heart_sprite_index = (game_state.heart_sprite_index + 1) % 2; // Cycle between 0 and 1
+            game_state.last_heart_sprite_index_change = std::time::Instant::now(); // Reset the timer to current time
+        }
+    }
+}
+
+pub struct AlternateGroundSpriteFrames;
+
+impl CoreLogic for AlternateGroundSpriteFrames {
+    fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
+        // Alternate between the grass sprite frames every 200 milliseconds
+        if game_state.last_ground_sprite_frame_index_change.elapsed() >= std::time::Duration::from_millis(200) {
+            game_state.ground_sprite_frame_index = (game_state.ground_sprite_frame_index + 1) % 2; // Cycle between 0 and 1
+            game_state.last_ground_sprite_frame_index_change = std::time::Instant::now(); // Reset the timer to current time
+        }
+    }
+}
+
+pub struct AlternateLightHouseSpriteFrames;
+
+impl CoreLogic for AlternateLightHouseSpriteFrames {
+    fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
+        // Alternate between the lighthouse sprite frames every 200 milliseconds
+        if game_state.last_light_house_lights_sprite_index_change.elapsed() >= std::time::Duration::from_millis(200) {
+            game_state.lighthouse_lights_sprite_index = (game_state.lighthouse_lights_sprite_index + 1) % 2; // Cycle between 0 and 1
+            game_state.last_light_house_lights_sprite_index_change = std::time::Instant::now(); // Reset the timer to current time
+        }
+    }
+}
+
+pub struct AlternateToxicTrapSpriteFrames;
+
+impl CoreLogic for AlternateToxicTrapSpriteFrames {
+    fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
+        // Alternate between the toxic trap sprite frames
+        if game_state.toxic_trap_sprite_index >= 4 {
+            if game_state.last_toxic_sprite_index_change.elapsed() >= std::time::Duration::from_millis(100) {
+                game_state.toxic_trap_sprite_index = if game_state.toxic_trap_sprite_index == 4 { 5 } else { 4 };
+                game_state.last_toxic_sprite_index_change = std::time::Instant::now(); // Reset the timer to current time
+            }
+        } else if game_state.last_toxic_sprite_index_change.elapsed() >= std::time::Duration::from_millis(200) {
+            game_state.toxic_trap_sprite_index = (game_state.toxic_trap_sprite_index + 1) % 6; // Cycle between 0 and 5
+            game_state.last_toxic_sprite_index_change = std::time::Instant::now(); // Reset the timer to current time
+        }
+    }
+}
+
 pub fn initialize_core_logic_map() -> HashMap<String, Rc<RefCell<dyn CoreLogic>>> {
     let mut logic_map: HashMap<String, Rc<RefCell<dyn CoreLogic>>> = HashMap::new();
+
+    logic_map.insert("AlternateLayerThreeSpriteFrames".to_string(), Rc::new(RefCell::new(AlternateGroundSpriteFrames)));
+    logic_map.insert("AlternateHeartSprites".to_string(), Rc::new(RefCell::new(AlternateHeartSpriteFrames)));
+    logic_map.insert("AlternateLightHouseSprites".to_string(), Rc::new(RefCell::new(AlternateLightHouseSpriteFrames)));
+    logic_map.insert("AlternateToxicTrapSprites".to_string(), Rc::new(RefCell::new(AlternateToxicTrapSpriteFrames)));
+
     logic_map.insert("JumpingObstacles".to_string(), Rc::new(RefCell::new(JumpingObstacles)));
     logic_map.insert("CollisionDetection".to_string(), Rc::new(RefCell::new(CollisionDetection)));
     logic_map.insert("ApplyGravity".to_string(), Rc::new(RefCell::new(ApplyGravity)));

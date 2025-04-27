@@ -133,12 +133,16 @@ fn main() {
         mountain_index: 0,
         previous_offset_x: 0,
         heart_sprite_index: 0,
-        layer_4_sprite_index: 0,
-        layer_3_sprite_index: 0,
+        lighthouse_lights_sprite_index: 0,
+        ground_sprite_frame_index: 0,
         toxic_trap_sprite_index: 0,
         layer_0_index: 0,
         damage_taken: false,
         designated_x: 0.0,
+        last_heart_sprite_index_change: std::time::Instant::now(),
+        last_ground_sprite_frame_index_change: std::time::Instant::now(),
+        last_light_house_lights_sprite_index_change: std::time::Instant::now(),
+        last_toxic_sprite_index_change: std::time::Instant::now()
     };
 
     start_event_loop(game_state, input_logic, core_logic, &mut sink);

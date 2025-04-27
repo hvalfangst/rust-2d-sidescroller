@@ -1,6 +1,3 @@
-use crate::graphics::sprites::draw_sprite;
-use crate::state::{GameState, Obstacle, Trap};
-
 pub mod sprites; pub mod render_graphics;
 pub mod update_graphics;
 
