@@ -155,9 +155,8 @@ fn draw_game_world(game_state: &mut GameState) {
 
             let final_x = (trap.x_left as isize - game_state.player.x as isize + fixed_player_x as isize) as usize;
 
-            if final_x < game_state.window_width / 2 && final_x > 0 {
+            if final_x < game_state.window_width / 4 && final_x > 0 {
                 let toxic_trap_sprite = &game_state.sprites.toxic_trap[game_state.toxic_trap_sprite_index];
-                // Draw trap
                 draw_sprite(final_x, trap.y_bottom as usize, toxic_trap_sprite, game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
             }
         }

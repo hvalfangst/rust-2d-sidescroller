@@ -95,8 +95,6 @@ pub struct Map<'a> {
     pub traps: &'a mut Vec<Trap>, // Traps for the map
 }
 
-
-
 pub struct GameState<'a> {
     pub player: Player, // Player object
     pub sprites: SpriteMaps, // Sprite maps
