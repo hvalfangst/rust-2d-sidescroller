@@ -161,8 +161,8 @@ pub struct AlternateLightHouseSpriteFrames;
 impl CoreLogic for AlternateLightHouseSpriteFrames {
     fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
         // Alternate between the lighthouse sprite frames every 200 milliseconds
-        if game_state.last_light_house_lights_sprite_index_change.elapsed() >= std::time::Duration::from_millis(200) {
-            game_state.lighthouse_lights_sprite_index = (game_state.lighthouse_lights_sprite_index + 1) % 2; // Cycle between 0 and 1
+        if game_state.last_light_house_lights_sprite_index_change.elapsed() >= std::time::Duration::from_millis(750) {
+            game_state.lighthouse_lights_sprite_index = (game_state.lighthouse_lights_sprite_index + 1) % 4; // Cycle between 0 and 3
             game_state.last_light_house_lights_sprite_index_change = std::time::Instant::now(); // Reset the timer to current time
         }
     }
