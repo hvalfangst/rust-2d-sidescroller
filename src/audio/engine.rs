@@ -1,6 +1,6 @@
-use std::io::{BufReader, Cursor};
-use rodio::{Sink, Source};
-use crate::state::{GameState, WALK_SOUND_1, WALK_SOUND_2, WALK_SOUND_3, WALK_SOUND_4};
+use rodio::Sink;
+use crate::state::constants::audio::{WALK_SOUND_1, WALK_SOUND_2, WALK_SOUND_3, WALK_SOUND_4};
+use crate::state::structs::GameState;
 
 pub fn append_source_source(game_state: &&mut GameState, sink: &mut Sink, sample: usize, duration: u64) {
     // let file = &game_state.sounds[sample];

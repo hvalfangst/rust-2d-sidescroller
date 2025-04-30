@@ -1,10 +1,8 @@
-use std::collections::HashSet;
-
 use minifb::Key;
 
-use crate::state::{Direction, ObstacleId};
-use crate::state::Direction::Right;
 use crate::state::player::PlayerState::OnGround;
+use crate::state::structs::Direction::Right;
+use crate::state::structs::Direction;
 
 // Define the states of the player
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -35,14 +33,9 @@ pub enum PlayerState {
         pub kick_frame: usize,
         pub kick_frame_timer: usize,
         pub almost_ground: bool,
-        pub obstacle_left: bool,
-        pub obstacle_right: bool,
-        pub on_obstacles: HashSet<ObstacleId>,
         pub is_jumping: bool,
         pub state: PlayerState,
         pub above_obstacle: bool,
-        pub current_map: usize,
-        pub spike_active: bool,
         pub game_over: bool,
         pub obstacle_detected: bool,
         pub health: u8,
@@ -69,14 +62,9 @@ impl Player {
             kick_frame_timer: 0,
             kick_start_time: 0,
             almost_ground: false,
-            obstacle_left: false,
-            obstacle_right: false,
-            on_obstacles: HashSet::new(),
             is_jumping: false,
             state: OnGround,
             above_obstacle: false,
-            current_map: 1,
-            spike_active: false,
             game_over: false,
             obstacle_detected: false,
             health: 3,

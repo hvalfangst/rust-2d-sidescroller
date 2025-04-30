@@ -3,12 +3,13 @@ use crate::graphics::sprites::draw_sprite;
 use crate::state::collision::{CheckTrapCollision, CollisionDetection};
 use crate::state::gravity::{ApplyGravity, JumpingObstacles};
 use crate::state::player::Player;
-use crate::state::{spawn_obstacle, spawn_trap, Direction, GameState, ACCELERATION, GROUND, LOWER_BOUND, MAX_VELOCITY, UPPER_BOUND};
 use rodio::Sink;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::thread::sleep;
+use crate::state::constants::physics::{ACCELERATION, GROUND, LOWER_BOUND, MAX_VELOCITY, UPPER_BOUND};
+use crate::state::structs::{Direction, GameState, Obstacle, ObstacleId, Trap, TrapId};
 
 pub fn execute_core_logic(game_state: &mut GameState, core_logic_operations: &HashMap<String, Rc<RefCell<dyn CoreLogic>>>, sink: &mut Sink) {
     for (_, core_logic_operation) in core_logic_operations.iter() {
@@ -90,7 +91,7 @@ impl CoreLogic for CheckGameOver {
             // Reset game state
             game_state.game_over_index = 0;
             game_state.player = Player::new(0.0, GROUND); // Reset player state
-            game_state.layer_0_index = 0;
+            game_state.mountains_sprite_frame_index = 0;
         }
     }
 }
@@ -137,9 +138,9 @@ pub struct AlternateHeartSpriteFrames;
 impl CoreLogic for AlternateHeartSpriteFrames {
     fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
         // Alternate between the heart sprite frames every 200 milliseconds
-        if game_state.last_heart_sprite_index_change.elapsed() >= std::time::Duration::from_millis(500) {
-            game_state.heart_sprite_index = (game_state.heart_sprite_index + 1) % 2; // Cycle between 0 and 1
-            game_state.last_heart_sprite_index_change = std::time::Instant::now(); // Reset the timer to current time
+        if game_state.last_heart_sprite_frame_index_change.elapsed() >= std::time::Duration::from_millis(500) {
+            game_state.heart_sprite_frame_index = (game_state.heart_sprite_frame_index + 1) % 2; // Cycle between 0 and 1
+            game_state.last_heart_sprite_frame_index_change = std::time::Instant::now(); // Reset the timer to current time
         }
     }
 }
@@ -161,9 +162,9 @@ pub struct AlternateLightHouseSpriteFrames;
 impl CoreLogic for AlternateLightHouseSpriteFrames {
     fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
         // Alternate between the lighthouse sprite frames every 200 milliseconds
-        if game_state.last_light_house_lights_sprite_index_change.elapsed() >= std::time::Duration::from_millis(750) {
-            game_state.lighthouse_lights_sprite_index = (game_state.lighthouse_lights_sprite_index + 1) % 4; // Cycle between 0 and 3
-            game_state.last_light_house_lights_sprite_index_change = std::time::Instant::now(); // Reset the timer to current time
+        if game_state.last_light_house_sprite_frame_index_change.elapsed() >= std::time::Duration::from_millis(750) {
+            game_state.lighthouse_sprite_frame_index = (game_state.lighthouse_sprite_frame_index + 1) % 4; // Cycle between 0 and 3
+            game_state.last_light_house_sprite_frame_index_change = std::time::Instant::now(); // Reset the timer to current time
         }
     }
 }
@@ -173,14 +174,14 @@ pub struct AlternateToxicTrapSpriteFrames;
 impl CoreLogic for AlternateToxicTrapSpriteFrames {
     fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
         // Alternate between the toxic trap sprite frames
-        if game_state.toxic_trap_sprite_index >= 4 {
-            if game_state.last_toxic_sprite_index_change.elapsed() >= std::time::Duration::from_millis(100) {
-                game_state.toxic_trap_sprite_index = if game_state.toxic_trap_sprite_index == 4 { 5 } else { 4 };
-                game_state.last_toxic_sprite_index_change = std::time::Instant::now(); // Reset the timer to current time
+        if game_state.toxic_trap_sprite_frame_index >= 4 {
+            if game_state.last_toxic_sprite_frame_index_change.elapsed() >= std::time::Duration::from_millis(100) {
+                game_state.toxic_trap_sprite_frame_index = if game_state.toxic_trap_sprite_frame_index == 4 { 5 } else { 4 };
+                game_state.last_toxic_sprite_frame_index_change = std::time::Instant::now(); // Reset the timer to current time
             }
-        } else if game_state.last_toxic_sprite_index_change.elapsed() >= std::time::Duration::from_millis(200) {
-            game_state.toxic_trap_sprite_index = (game_state.toxic_trap_sprite_index + 1) % 6; // Cycle between 0 and 5
-            game_state.last_toxic_sprite_index_change = std::time::Instant::now(); // Reset the timer to current time
+        } else if game_state.last_toxic_sprite_frame_index_change.elapsed() >= std::time::Duration::from_millis(200) {
+            game_state.toxic_trap_sprite_frame_index = (game_state.toxic_trap_sprite_frame_index + 1) % 6; // Cycle between 0 and 5
+            game_state.last_toxic_sprite_frame_index_change = std::time::Instant::now(); // Reset the timer to current time
         }
     }
 }
@@ -209,6 +210,108 @@ impl CoreLogic for SpawnTraps {
             game_state.trap_spawned = true;
         }
     }
+}
+
+fn spawn_obstacle(x: f32, y: f32, obstacles: &mut Vec<Obstacle>) {
+    let x_left = x;
+    let x_right = x + 16.0;
+    let y_bottom = y;
+    let y_top = y_bottom - 16.0;
+
+    // Add a new obstacle
+    obstacles.push(Obstacle {
+        id: ObstacleId(obstacles.len()),
+        x_left,
+        x_right,
+        y_bottom,
+        y_top,
+        active: true,
+        durability: 2,
+        falling: false,
+        velocity_y: 0.0,
+        left_obstacle: None,
+        right_obstacle: None,
+        over_obstacle: None,
+        under_obstacle: None,
+        is_bottom_obstacle: false,
+        is_top_obstacle: true,
+        is_leftmost_obstacle: false,
+        is_rightmost_obstacle: false,
+    });
+
+    println!("Spawned obstacle at x: {}, y: {}", x, y_bottom);
+}
+
+fn spawn_trap(x: f32, y: f32, traps: &mut Vec<Trap>) {
+    let x_left = x;
+    let x_right = x + 16.0;
+    let y_bottom = y;
+    let y_top = y_bottom - 16.0;
+
+    // Add a new trap
+    traps.push(Trap {
+        id: TrapId(traps.len()),
+        x_left,
+        x_right,
+        y_bottom,
+        y_top,
+        active: true
+    });
+
+    println!("Spawned trap at x: {}, y: {}", x, y);
+}
+
+fn spawn_stacked_obstacles(
+    x: f32,
+    y_start: f32,
+    count: usize,
+    obstacles: &mut Vec<Obstacle>,
+    traps: &mut Vec<Trap>,
+) {
+    let mut y_bottom = y_start;
+    let mut y_top = y_bottom - 16.0;
+
+    for i in 0..count {
+        // Add a new obstacle
+        obstacles.push(Obstacle {
+            id: ObstacleId(obstacles.len()),
+            x_left: x,
+            x_right: x + 16.0,
+            y_bottom,
+            y_top,
+            active: true,
+            durability: 2,
+            falling: false,
+            velocity_y: 0.0,
+            left_obstacle: None,
+            right_obstacle: None,
+            over_obstacle: if i > 0 { Some(ObstacleId(obstacles.len() - 1)) } else { None },
+            under_obstacle: None,
+            is_bottom_obstacle: i == 0,
+            is_top_obstacle: i == count - 1,
+            is_leftmost_obstacle: false,
+            is_rightmost_obstacle: false,
+        });
+
+        // Update y-coordinates for the next obstacle
+        y_bottom = y_top;
+        y_top -= 16.0;
+    }
+
+    // Add a trap at the base of the stack
+    traps.push(Trap {
+        id: TrapId(traps.len()),
+        x_left: x + 16.0,
+        x_right: x + 32.0,
+        y_bottom: y_start,
+        y_top: y_start - 16.0,
+        active: true,
+    });
+
+    println!(
+        "Spawned {} stacked obstacles and a trap at x: {}, starting y: {}",
+        count, x, y_start
+    );
 }
 
 pub fn initialize_core_logic_map() -> HashMap<String, Rc<RefCell<dyn CoreLogic>>> {

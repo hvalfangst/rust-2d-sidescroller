@@ -1,5 +1,4 @@
-use std::thread::sleep;
-use crate::state::GameState;
+use crate::state::structs::GameState;
 
 pub fn render_pixel_buffer(game_state: &mut GameState) {
     // Scale the buffer to the screen resolution

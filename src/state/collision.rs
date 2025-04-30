@@ -1,9 +1,9 @@
 use std::thread::sleep;
 use crate::state::core_logic::CoreLogic;
-use crate::state::{Direction, GameState, Obstacle};
 use rodio::Sink;
 use crate::graphics::sprites::SpriteMaps;
 use crate::state::player::Player;
+use crate::state::structs::{Direction, GameState, Obstacle};
 
 pub struct CollisionDetection;
 
@@ -27,7 +27,7 @@ pub fn check_collision(obstacles: &Vec<Obstacle>, sprites: &SpriteMaps, player: 
     let mut collision_id: Option<usize> = None;
     // println!("----------------------------------------------------------------------");
     let collision = obstacles.iter().enumerate().any(|(index, obstacle)| {
-        // println!("Checking collision: id: {:?}, x_left: {}, x_right: {}, y_bottom: {}, y_top: {}", obstacle.id, obstacle.x_left, obstacle.x_right, obstacle.y_bottom, obstacle.y_top);
+        // println!("Checking collision: _id: {:?}, x_left: {}, x_right: {}, y_bottom: {}, y_top: {}", obstacle._id, obstacle.x_left, obstacle.x_right, obstacle.y_bottom, obstacle.y_top);
 
         if obstacle.active == false {
             // println!("- - - - Obstacle is not active - - - -");
@@ -47,7 +47,7 @@ pub fn check_collision(obstacles: &Vec<Obstacle>, sprites: &SpriteMaps, player: 
                 // println!("Collision of x detected: p_x: {}, obs.x_left: {}, obs.x_right: {}", player_x, obstacle.x_left, obstacle.x_right);
 
                 collision_id = Some(index);
-                // println!("Collision detected with obstacle id {:?} x.left {}, x.right: {}, obstacle.y_bottom: {}, obstacle.y_top: {}", obstacle.id, obstacle.x_left, obstacle.x_right , obstacle.y_bottom + 25.0, obstacle.y_top + 25.0);
+                // println!("Collision detected with obstacle _id {:?} x.left {}, x.right: {}, obstacle.y_bottom: {}, obstacle.y_top: {}", obstacle._id, obstacle.x_left, obstacle.x_right , obstacle.y_bottom + 25.0, obstacle.y_top + 25.0);
                 true
             } else {
                 false
@@ -57,7 +57,7 @@ pub fn check_collision(obstacles: &Vec<Obstacle>, sprites: &SpriteMaps, player: 
         }
     });
 
-    if let Some(id) = collision_id {
+    if let Some(_id) = collision_id {
     }
 
     (collision, collision_id)
@@ -84,8 +84,7 @@ impl CoreLogic for CheckTrapCollision {
                 if player.y <= trap.y_bottom && player.y >= trap.y_top {
                     game_state.player.health -= 1;
 
-                    game_state.layer_0_index = 1;
-                    game_state.damage_taken = true;
+                    game_state.mountains_sprite_frame_index = 1;
                     game_state.designated_x = trap.x_left - 64.0;
 
                     sleep(std::time::Duration::from_millis(250));

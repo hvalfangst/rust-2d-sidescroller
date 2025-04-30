@@ -2,7 +2,9 @@ use minifb::Key;
 use rodio::Sink;
 use crate::audio::engine::append_source_source;
 use crate::input::handler::InputLogic;
-use crate::state::{GameState, JUMP_SOUND, JUMP_VELOCITY};
+use crate::state::constants::audio::JUMP_SOUND;
+use crate::state::constants::physics::JUMP_VELOCITY;
+use crate::state::structs::GameState;
 
 pub struct Jump;
 

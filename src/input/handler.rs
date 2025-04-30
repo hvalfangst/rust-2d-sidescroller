@@ -2,12 +2,12 @@ use crate::input::jump::Jump;
 use crate::input::kick::Kick;
 use crate::input::move_left::MoveLeft;
 use crate::input::move_right::MoveRight;
-use crate::state::GameState;
 use minifb::{Key, KeyRepeat};
 use rodio::Sink;
 use std::collections::HashMap;
 use std::sync::Arc;
 use crate::state::core_logic::decrease_velocity;
+use crate::state::structs::GameState;
 
 pub fn handle_user_input(game_state: &mut GameState, commands: &InputLogicMap, sink: &mut Sink) {
 

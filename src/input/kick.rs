@@ -1,9 +1,10 @@
 use rodio::Sink;
 use crate::audio::engine::append_source_source;
 use crate::input::handler::{InputLogic};
-use crate::state::Direction::Left;
-use crate::state::{GameState, KICK_BOX_SOUND, KICK_SOUND};
 use crate::state::collision::check_collision;
+use crate::state::constants::audio::{KICK_BOX_SOUND, KICK_SOUND};
+use crate::state::structs::Direction::Left;
+use crate::state::structs::GameState;
 
 pub struct Kick;
 

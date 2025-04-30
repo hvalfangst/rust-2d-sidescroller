@@ -3,8 +3,8 @@ use rodio::Sink;
 use crate::audio::engine::play_footstep_sound;
 use crate::input::handler::InputLogic;
 use crate::state::core_logic::increase_velocity;
-use crate::state::Direction::Right;
-use crate::state::GameState;
+use crate::state::structs::Direction::Right;
+use crate::state::structs::GameState;
 
 pub struct MoveRight;
 

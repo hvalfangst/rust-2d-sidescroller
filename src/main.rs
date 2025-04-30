@@ -7,7 +7,6 @@ use winit::event_loop::EventLoop;
 use winit::monitor::MonitorHandle;
 
 use crate::state::player::Player;
-use crate::state::{GameState, Map, Obstacle, ObstacleId};
 use crate::{
     graphics::sprites::SpriteMaps,
     state::core_logic::initialize_core_logic_map,
@@ -15,8 +14,8 @@ use crate::{
 };
 use rodio::{OutputStream, Sink};
 use input::handler::initialize_input_logic_map;
-use crate::graphics::{SCALED_WINDOW_HEIGHT, SCALED_WINDOW_WIDTH};
-
+use crate::state::constants::graphics::{SCALED_WINDOW_HEIGHT, SCALED_WINDOW_WIDTH};
+use crate::state::structs::{GameState, Map, Obstacle, ObstacleId};
 
 mod state;
 mod graphics;
@@ -27,22 +26,10 @@ fn main() {
     // Initialize the audio output stream and sink
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
     let mut sink = Sink::try_new(&stream_handle).unwrap();
-
     let sprites = SpriteMaps::new();
     let mut player = Player::new(100.0, 176.0);
     let input_logic = initialize_input_logic_map();
     let core_logic = initialize_core_logic_map();
-
-    let (mut map_one_tiles, map_one_width, map_one_height) = read_grid_from_file("assets/maps/map_one.txt").expect("Failed to read grid from file");
-    let (mut map_two_tiles, _map_two_width, _map_two_height) = read_grid_from_file("assets/maps/map_two.txt").expect("Failed to read grid from file");
-    let (mut map_three_tiles, map_two_width, map_two_height) = read_grid_from_file("assets/maps/map_three.txt").expect("Failed to read grid from file");
-
-    let mut map_one_obstacles = Vec::new(); //extract_obstacles(&map_one_tiles);
-    let mut map_two_obstacles = Vec::new(); //extract_obstacles(&map_two_tiles);
-    let mut map_three_obstacles = Vec::new();  //extract_obstacles(&map_three_tiles);
-
-
-
     let fullscreen = false;
 
     // Determine window size based on fullscreen flag
@@ -66,46 +53,34 @@ fn main() {
 
 
     // Initialize window and scaled buffer
-    let mut window_buffer = vec![0; map_one_width * map_one_height];
+    let mut window_buffer = vec![0; 256 * 224];
     let mut scaled_buffer = vec![0; window_width * window_height];
 
     let map_one = Map {
         id: 1,
-        tiles: map_one_tiles,
-        obstacles: &mut map_one_obstacles,
-        width: map_one_width,
-        height: map_one_height,
-        starting_x: 0.0,
-        starting_y: 0.0,
-        transition_x: 200.0,
-        transition_y: 0.0,
-        traps: &mut Vec::new()
+        obstacles: &mut Vec::new(),
+        width: 256,
+        height: 224,
+        traps: &mut Vec::new(),
+        transition_x: None,
     };
 
     let map_two = Map {
         id: 2,
-        tiles: map_two_tiles,
-        obstacles: &mut map_two_obstacles,
-        width: map_two_width,
-        height: map_two_height,
-        starting_x: 0.0,
-        starting_y: 0.0,
-        transition_x: 200.0,
-        transition_y: 0.0,
-        traps: &mut Vec::new()
+        obstacles: &mut Vec::new(),
+        width: 256,
+        height: 224,
+        traps: &mut Vec::new(),
+        transition_x: Some(500.0)
     };
 
     let map_three = Map {
         id: 3,
-        tiles: map_three_tiles,
-        obstacles: &mut map_three_obstacles,
-        width: map_two_width,
-        height: map_two_height,
-        starting_x: 0.0,
-        starting_y: 0.0,
-        transition_x: 200.0,
-        transition_y: 0.0,
-        traps: &mut Vec::new()
+        obstacles: &mut Vec::new(),
+        width: 256,
+        height: 224,
+        traps: &mut Vec::new(),
+        transition_x: Some(1500.0)
     };
 
     let all_maps = vec![map_one, map_two, map_three];
@@ -113,13 +88,10 @@ fn main() {
     let sounds: Vec<Vec<u8>> = load_sounds();
 
 
-
     let game_state = GameState {
         player,
         sprites,
         window_buffer: &mut window_buffer,
-        grass_sprite_index: 0,
-        sky_sprite_index: 0,
         window_width,
         window_height,
         window: &mut window,
@@ -130,21 +102,19 @@ fn main() {
         footstep_index: 0,
         footstep_active: false,
         sounds,
-        mountain_index: 0,
-        previous_offset_x: 0,
-        heart_sprite_index: 0,
-        lighthouse_lights_sprite_index: 0,
+        heart_sprite_frame_index: 0,
+        lighthouse_sprite_frame_index: 0,
         ground_sprite_frame_index: 0,
-        toxic_trap_sprite_index: 0,
-        layer_0_index: 0,
-        damage_taken: false,
-        designated_x: 0.0,
-        last_heart_sprite_index_change: std::time::Instant::now(),
+        toxic_trap_sprite_frame_index: 0,
+        mountains_sprite_frame_index: 0,
+        last_heart_sprite_frame_index_change: std::time::Instant::now(),
         last_ground_sprite_frame_index_change: std::time::Instant::now(),
-        last_light_house_lights_sprite_index_change: std::time::Instant::now(),
-        last_toxic_sprite_index_change: std::time::Instant::now(),
+        last_light_house_sprite_frame_index_change: std::time::Instant::now(),
+        last_toxic_sprite_frame_index_change: std::time::Instant::now(),
         obstacle_spawned: false,
         trap_spawned: false,
+        designated_x: 0.0,
+        damage_taken: false,
     };
 
     start_event_loop(game_state, input_logic, core_logic, &mut sink);

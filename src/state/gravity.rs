@@ -1,8 +1,10 @@
 use rodio::Sink;
 use crate::audio::engine::append_source_source;
 use crate::state::core_logic::CoreLogic;
-use crate::state::{GameState, DOWN_SOUND, FALL_MILD_SOUND, GRAVITY, GROUND};
+use crate::state::constants::audio::{DOWN_SOUND, FALL_MILD_SOUND};
+use crate::state::constants::physics::{GRAVITY, GROUND};
 use crate::state::player::PlayerState;
+use crate::state::structs::GameState;
 
 pub struct ApplyGravity;
 
