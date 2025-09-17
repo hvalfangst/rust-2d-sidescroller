@@ -24,8 +24,7 @@ pub struct SpriteMaps {
     pub sea: Vec<SpriteFrame>,
     pub lighthouse: Vec<SpriteFrame>,
     pub ground: Vec<SpriteFrame>,
-    pub heart: Vec<SpriteFrame>,
-    pub toxic_trap: Vec<SpriteFrame>
+    pub heart: Vec<SpriteFrame>
 }
 
 impl SpriteMaps {
@@ -43,7 +42,6 @@ impl SpriteMaps {
             ground: load_sprites_from_map("assets/sprites/layer_3.png", 256, 224),
             lighthouse: load_sprites_from_map("assets/sprites/layer_4.png", 256, 224),
             heart: load_sprites_from_map("assets/sprites/heart.png", 14, 12),
-            toxic_trap: load_sprites_from_map("assets/sprites/toxic_trap.png", 16, 16),
         }
     }
 }

@@ -12,6 +12,9 @@ pub enum Direction {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct ObstacleId(pub usize);
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct EnemyId(pub usize);
+
 #[derive(Clone, Copy)]
 pub struct Obstacle {
     pub id: ObstacleId,
@@ -33,25 +36,11 @@ pub struct Obstacle {
     pub under_obstacle: Option<ObstacleId> // Id of the obstacle below
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct TrapId(pub usize);
-
-#[derive(Clone, Copy)]
-pub struct Trap {
-    pub id: TrapId,
-    pub x_left: f32, // left x coordinate of the box (lower x value)
-    pub x_right: f32, // right x coordinate of the box (higher x value)
-    pub y_top: f32, // top y coordinate of the box (lower y value)
-    pub y_bottom: f32, // bottom y coordinate of the box (higher y value)
-    pub active: bool // If false, box is removed
-}
-
 pub struct Map<'a> {
     pub id: usize, // Unique identifier for the map
     pub width: usize, // Width of the map
     pub height: usize, // Height of the map
     pub obstacles: &'a mut Vec<Obstacle>, // Obstacles for the map
-    pub traps: &'a mut Vec<Trap>, // Traps for the map
     pub transition_x: Option<f32>, // X-coordinate for map transition
 }
 
@@ -72,14 +61,11 @@ pub struct GameState<'a> {
     pub heart_sprite_frame_index: usize, // Index for the heart sprite animation frame
     pub lighthouse_sprite_frame_index: usize, // Index for the lighthouse sprite animation frame
     pub ground_sprite_frame_index: usize, // Index for the ground sprite animation frame
-    pub toxic_trap_sprite_frame_index: usize, // Index for the toxic trap sprite animation frame
     pub mountains_sprite_frame_index: usize, // Index for the mountains sprite animation frame
     pub last_heart_sprite_frame_index_change: Instant, // Timestamp of the last heart sprite frame change
     pub last_ground_sprite_frame_index_change: Instant, // Timestamp of the last ground sprite frame change
     pub last_light_house_sprite_frame_index_change: Instant, // Timestamp of the last lighthouse sprite frame change
-    pub last_toxic_sprite_frame_index_change: Instant, // Timestamp of the last toxic trap sprite frame change
     pub obstacle_spawned: bool, // Indicates if an obstacle has been spawned
-    pub trap_spawned: bool, // Indicates if a trap has been spawned
     pub designated_x: f32, // X-coordinate for the player to converge to
     pub damage_taken: bool, // Indicates if the player has taken damage
 }

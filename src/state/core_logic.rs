@@ -1,6 +1,6 @@
 use crate::graphics::render_graphics::render_pixel_buffer;
 use crate::graphics::sprites::draw_sprite;
-use crate::state::collision::{CheckTrapCollision, CollisionDetection};
+use crate::state::collision::CollisionDetection;
 use crate::state::gravity::{ApplyGravity, JumpingObstacles};
 use crate::state::player::Player;
 use rodio::Sink;
@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::thread::sleep;
 use crate::state::constants::physics::{ACCELERATION, GROUND, LOWER_BOUND, MAX_VELOCITY, UPPER_BOUND};
-use crate::state::structs::{Direction, GameState, Obstacle, ObstacleId, Trap, TrapId};
+use crate::state::structs::{Direction, GameState, Obstacle, ObstacleId};
 
 pub fn execute_core_logic(game_state: &mut GameState, core_logic_operations: &HashMap<String, Rc<RefCell<dyn CoreLogic>>>, sink: &mut Sink) {
     for (_, core_logic_operation) in core_logic_operations.iter() {
@@ -169,22 +169,6 @@ impl CoreLogic for AlternateLightHouseSpriteFrames {
     }
 }
 
-pub struct AlternateToxicTrapSpriteFrames;
-
-impl CoreLogic for AlternateToxicTrapSpriteFrames {
-    fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
-        // Alternate between the toxic trap sprite frames
-        if game_state.toxic_trap_sprite_frame_index >= 4 {
-            if game_state.last_toxic_sprite_frame_index_change.elapsed() >= std::time::Duration::from_millis(100) {
-                game_state.toxic_trap_sprite_frame_index = if game_state.toxic_trap_sprite_frame_index == 4 { 5 } else { 4 };
-                game_state.last_toxic_sprite_frame_index_change = std::time::Instant::now(); // Reset the timer to current time
-            }
-        } else if game_state.last_toxic_sprite_frame_index_change.elapsed() >= std::time::Duration::from_millis(200) {
-            game_state.toxic_trap_sprite_frame_index = (game_state.toxic_trap_sprite_frame_index + 1) % 6; // Cycle between 0 and 5
-            game_state.last_toxic_sprite_frame_index_change = std::time::Instant::now(); // Reset the timer to current time
-        }
-    }
-}
 
 pub struct SpawnObstacles;
 
@@ -200,17 +184,6 @@ impl CoreLogic for SpawnObstacles {
     }
 }
 
-pub struct SpawnTraps;
-
-impl CoreLogic for SpawnTraps {
-    fn execute(&self, game_state: &mut GameState, sink: &mut Sink) {
-        if !game_state.trap_spawned {
-            spawn_trap(216.0, 200.0, game_state.all_maps[game_state.current_map_index].traps);
-            spawn_trap(366.0, 200.0, game_state.all_maps[game_state.current_map_index].traps);
-            game_state.trap_spawned = true;
-        }
-    }
-}
 
 fn spawn_obstacle(x: f32, y: f32, obstacles: &mut Vec<Obstacle>) {
     let x_left = x;
@@ -242,31 +215,12 @@ fn spawn_obstacle(x: f32, y: f32, obstacles: &mut Vec<Obstacle>) {
     println!("Spawned obstacle at x: {}, y: {}", x, y_bottom);
 }
 
-fn spawn_trap(x: f32, y: f32, traps: &mut Vec<Trap>) {
-    let x_left = x;
-    let x_right = x + 16.0;
-    let y_bottom = y;
-    let y_top = y_bottom - 16.0;
-
-    // Add a new trap
-    traps.push(Trap {
-        id: TrapId(traps.len()),
-        x_left,
-        x_right,
-        y_bottom,
-        y_top,
-        active: true
-    });
-
-    println!("Spawned trap at x: {}, y: {}", x, y);
-}
 
 fn spawn_stacked_obstacles(
     x: f32,
     y_start: f32,
     count: usize,
     obstacles: &mut Vec<Obstacle>,
-    traps: &mut Vec<Trap>,
 ) {
     let mut y_bottom = y_start;
     let mut y_top = y_bottom - 16.0;
@@ -298,18 +252,8 @@ fn spawn_stacked_obstacles(
         y_top -= 16.0;
     }
 
-    // Add a trap at the base of the stack
-    traps.push(Trap {
-        id: TrapId(traps.len()),
-        x_left: x + 16.0,
-        x_right: x + 32.0,
-        y_bottom: y_start,
-        y_top: y_start - 16.0,
-        active: true,
-    });
-
     println!(
-        "Spawned {} stacked obstacles and a trap at x: {}, starting y: {}",
+        "Spawned {} stacked obstacles at x: {}, starting y: {}",
         count, x, y_start
     );
 }
@@ -320,10 +264,8 @@ pub fn initialize_core_logic_map() -> HashMap<String, Rc<RefCell<dyn CoreLogic>>
     logic_map.insert("AlternateLayerThreeSpriteFrames".to_string(), Rc::new(RefCell::new(AlternateGroundSpriteFrames)));
     logic_map.insert("AlternateHeartSprites".to_string(), Rc::new(RefCell::new(AlternateHeartSpriteFrames)));
     logic_map.insert("AlternateLightHouseSprites".to_string(), Rc::new(RefCell::new(AlternateLightHouseSpriteFrames)));
-    logic_map.insert("AlternateToxicTrapSprites".to_string(), Rc::new(RefCell::new(AlternateToxicTrapSpriteFrames)));
 
     logic_map.insert("SpawnObstacles".to_string(), Rc::new(RefCell::new(SpawnObstacles)));
-    logic_map.insert("SpawnTraps".to_string(), Rc::new(RefCell::new(SpawnTraps)));
 
     logic_map.insert("JumpingObstacles".to_string(), Rc::new(RefCell::new(JumpingObstacles)));
     logic_map.insert("CollisionDetection".to_string(), Rc::new(RefCell::new(CollisionDetection)));
@@ -332,7 +274,6 @@ pub fn initialize_core_logic_map() -> HashMap<String, Rc<RefCell<dyn CoreLogic>>
     logic_map.insert("HorizontalBounds".to_string(), Rc::new(RefCell::new(HorizontalBounds)));
     logic_map.insert("CheckGameOver".to_string(), Rc::new(RefCell::new(CheckGameOver)));
     logic_map.insert("ModifyPosition".to_string(), Rc::new(RefCell::new(ModifyPosition)));
-    logic_map.insert("CheckTrapCollision".to_string(), Rc::new(RefCell::new(CheckTrapCollision)));
 
     logic_map
 }

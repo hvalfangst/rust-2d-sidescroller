@@ -87,7 +87,6 @@ fn draw_player(game_state: &mut GameState) {
 fn draw_game_world(game_state: &mut GameState) {
     draw_map(game_state);
     draw_obstacles(game_state);
-    draw_traps(game_state);
     draw_hearts(game_state);
 }
 
@@ -150,19 +149,6 @@ fn draw_obstacles(game_state: &mut GameState) {
     });
 }
 
-fn draw_traps(game_state: &mut GameState) {
-    // Draw the traps
-    game_state.all_maps[game_state.current_map_index].traps.iter().enumerate().for_each(|(index, trap)| {
-        if trap.active {
-            let relative_x = calculate_relative_x(trap.x_left as isize, game_state.player.x as isize);
-
-            if relative_x < game_state.window_width / 4 && relative_x > 0 {
-                let toxic_trap_sprite = &game_state.sprites.toxic_trap[game_state.toxic_trap_sprite_frame_index];
-                draw_sprite(relative_x, trap.y_bottom as usize, toxic_trap_sprite, game_state.window_buffer, game_state.all_maps[game_state.current_map_index].width);
-            }
-        }
-    });
-}
 
 fn draw_hearts(game_state: &mut GameState) {
     let heart_sprite_width = game_state.sprites.heart[game_state.heart_sprite_frame_index].width as usize;

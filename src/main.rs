@@ -61,7 +61,6 @@ fn main() {
         obstacles: &mut Vec::new(),
         width: 256,
         height: 224,
-        traps: &mut Vec::new(),
         transition_x: None,
     };
 
@@ -70,7 +69,6 @@ fn main() {
         obstacles: &mut Vec::new(),
         width: 256,
         height: 224,
-        traps: &mut Vec::new(),
         transition_x: Some(500.0)
     };
 
@@ -79,7 +77,6 @@ fn main() {
         obstacles: &mut Vec::new(),
         width: 256,
         height: 224,
-        traps: &mut Vec::new(),
         transition_x: Some(1500.0)
     };
 
@@ -105,14 +102,11 @@ fn main() {
         heart_sprite_frame_index: 0,
         lighthouse_sprite_frame_index: 0,
         ground_sprite_frame_index: 0,
-        toxic_trap_sprite_frame_index: 0,
         mountains_sprite_frame_index: 0,
         last_heart_sprite_frame_index_change: std::time::Instant::now(),
         last_ground_sprite_frame_index_change: std::time::Instant::now(),
         last_light_house_sprite_frame_index_change: std::time::Instant::now(),
-        last_toxic_sprite_frame_index_change: std::time::Instant::now(),
         obstacle_spawned: false,
-        trap_spawned: false,
         designated_x: 0.0,
         damage_taken: false,
     };
